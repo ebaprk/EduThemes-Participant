@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "eduthemes-abepark"
+  },
+  "targets": {
+    "eduthemes-abepark": {
+      "hosting": {
+        "participant": [
+          "eduthemes-participant-abepark"
+        ]
+      }
+    }
+  }
+}
