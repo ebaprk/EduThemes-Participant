@@ -7,7 +7,8 @@
     "dev": "vite --port 3001",
     "start": "vite --port 3001",
     "build": "vite build",
-    "preview": "vite preview --port 3001"
+    "preview": "vite preview --port 3001",
+    "test": "node --env-file=.env.production --test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",

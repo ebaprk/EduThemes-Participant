@@ -20,3 +20,13 @@
 .participant-form .study-primary { margin-top: 10px; }
 .join-form { display: grid; gap: 12px; }
 @media (max-width: 640px) { .study-shell { width: min(100% - 28px, 1080px); padding-top: 30px; } .study-panel { padding: 21px; } }
+
+.canvas-connection { margin: 22px 0; }
+.canvas-connection h2 { margin: 0 0 10px; font-size: 1.35rem; }
+.canvas-connection summary { cursor: pointer; font-weight: 700; }
+.canvas-connection dl { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 2fr); gap: 8px 16px; margin: 18px 0; }
+.canvas-connection dt { font-weight: 700; }
+.canvas-connection dd { margin: 0; overflow-wrap: anywhere; }
+.canvas-disconnect { margin-top: 16px; padding: 7px 0; color: #176b52; background: transparent; border: 0; text-decoration: underline; cursor: pointer; }
+.canvas-consent { display: flex; align-items: flex-start; gap: 10px; margin: 22px 0; line-height: 1.6; }
+.canvas-consent input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 4px; }

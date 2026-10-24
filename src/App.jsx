@@ -2,20 +2,22 @@ import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Participant from './components/Participant';
+import { CanvasProvider } from './components/CanvasConnection';
 import './App.css';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="App">
+      <CanvasProvider><div className="App">
         <Header />
         <Routes>
           <Route path="/" element={<Participant />} />
           <Route path="/join" element={<Participant />} />
           <Route path="/join/:code" element={<Participant />} />
+          <Route path="/canvas" element={<Participant />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
+      </div></CanvasProvider>
     </BrowserRouter>
   );
 }
