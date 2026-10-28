@@ -4,6 +4,7 @@ import { supabase, supabaseConfigured } from '../supabase';
 import CanvasConnection, { useCanvas } from './CanvasConnection';
 import { canvasToken, submissionRequestId, submitCanvasStudy } from '../utils/canvas';
 import { readDraft, submissionArguments, usesCanvas } from '../utils/studyParticipation';
+import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
 import './Studies.css';
 
 export default function Participant() {
@@ -17,6 +18,7 @@ export default function Participant() {
   const [accepted, setAccepted] = useState(false);
   const [consented, setConsented] = useState(false);
   const [loading, setLoading] = useState(Boolean(code));
+  const [resolvedCode, setResolvedCode] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
   const [receipt, setReceipt] = useState(null);
@@ -26,16 +28,17 @@ export default function Participant() {
   const withCanvas = study ? usesCanvas(study, Boolean(canvas.participant || canvas.error || canvasToken())) : false;
   const draftKey = study ? `eduthemes.draft.${code}.${study.version_id}.${withCanvas ? `canvas-${canvasToken()?.slice(-12) || 'pending'}` : 'anonymous'}` : null;
   const receiptKey = draftKey ? `${draftKey}.receipt` : null;
+  const preparingStudy = loading || resolvedCode !== code || Boolean(study && (canvas.loading || loadedDraftKey !== draftKey));
 
   useEffect(() => {
     setAnswers({}); setFinished(false); setReceipt(null); setAccepted(false); setConsented(false);
     setShareDetails(false); setLoadedDraftKey(null); setStudy(null);
-    if (!code || !supabase) return undefined;
+    if (!code || !supabase) { setLoading(false); return undefined; }
     let active = true;
     setLoading(true); setError('');
     supabase.rpc('get_public_study', { p_code: code }).then(({ data, error: loadError }) => {
       if (!active) return;
-      setLoading(false);
+      setResolvedCode(code); setLoading(false);
       if (loadError) setError(loadError.message);
       else if (!data) setError('This study link is unavailable or the study is closed.');
       else setStudy(data);
@@ -98,7 +101,7 @@ export default function Participant() {
 
   return <main className="study-shell participant-shell">
     <span className="study-eyebrow">Participant portal</span>
-    {!supabaseConfigured ? <p role="alert">This site has not been connected to Supabase yet.</p> : loading ? <p role="status">Loading study…</p> : finished ? <section className="study-panel" role="status"><h1>Thank you for participating</h1><p>Your responses were submitted successfully for version {study.version_number} of this study.</p>
+    {!supabaseConfigured ? <p role="alert">This site has not been connected to Supabase yet.</p> : preparingStudy ? <LoadingSkeleton variant="study" rows={2} label="Loading your study…" /> : finished ? <section className="study-panel" role="status"><h1>Thank you for participating</h1><p>Your responses were submitted successfully for version {study.version_number} of this study.</p>
       {receipt?.consent_accepted_at && <p>Consent recorded {new Date(receipt.consent_accepted_at).toLocaleString()}.</p>}
       <p className="study-help">Submission reference: {receipt?.submission_id}</p><div className="study-actions"><button type="button" className="study-secondary" onClick={downloadReceipt}>Download study receipt</button><Link to="/">Join another study</Link></div>
     </section> : study ? <>
@@ -112,10 +115,13 @@ export default function Participant() {
         {study.participant_mode === 'canvas' && !canvas.participant && <p className="study-error" role="alert">This study requires verified Canvas details. Open EduThemes from your Canvas course, then enter this study code.</p>}
         {storageWarning && <p className="study-note" role="status">This browser cannot save your draft. Keep this page open until you submit.</p>}
         <form className="study-panel participant-form" onSubmit={submit}>
+          <fieldset className="participant-fields" disabled={submitting} hidden={submitting}>
           {(study.questions || []).map((question, index) => <div className="study-field" key={question.id}><label htmlFor={`answer-${question.id}`}>{index + 1}. {question.prompt}</label><textarea id={`answer-${question.id}`} value={answers[question.id] || ''} onChange={(event) => setAnswers((previous) => ({ ...previous, [question.id]: event.target.value }))} rows={5} maxLength={10000} required /></div>)}
           {withCanvas && canvas.participant && <label className="canvas-consent"><input type="checkbox" checked={shareDetails} onChange={(event) => setShareDetails(event.target.checked)} required /> I agree to include the Canvas details shown above with my answers to this study.</label>}
+          </fieldset>
+          {submitting && <LoadingSkeleton variant="connection" label="Submitting your responses and preparing your receipt…" />}
           {error && <p className="study-error" role="alert">{error}</p>}
-          <button className="study-primary" type="submit" disabled={submitting || (withCanvas && (canvas.loading || Boolean(canvas.error) || !canvas.participant || !shareDetails))}>{submitting ? 'Submitting…' : 'Submit responses'}</button>
+          <button className="study-primary" type="submit" aria-busy={submitting} disabled={submitting || (withCanvas && (canvas.loading || Boolean(canvas.error) || !canvas.participant || !shareDetails))}>{submitting ? <><Skeleton className="edu-skeleton--button" />Submitting…</> : 'Submit responses'}</button>
         </form>
       </>}
     </> : <section className="study-panel"><h1>Study unavailable</h1><p role="alert">{error}</p><Link to="/">Enter another code</Link></section>}

@@ -40,3 +40,5 @@
 .canvas-disconnect { margin-top: 16px; padding: 7px 0; color: #176b52; background: transparent; border: 0; text-decoration: underline; cursor: pointer; }
 .canvas-consent { display: flex; align-items: flex-start; gap: 10px; margin: 22px 0; line-height: 1.6; }
 .canvas-consent input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 4px; }
+
+.participant-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
