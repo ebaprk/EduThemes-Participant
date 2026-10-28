@@ -39,3 +39,13 @@ Apply the researcher repository migration `202610280001_teams_versions_consent.s
 Participants review version-specific consent before seeing questions. Anonymous studies never attach Canvas details. Identified studies require Canvas and a separate sharing confirmation. Submissions carry a displayed version ID, explicit consent confirmation, and an idempotent request ID; stale versions and missing consent are rejected by the database. Historical studies preserve their original unrecorded-consent status.
 
 Draft answers are saved in tab session storage, separated by study version and participant context. Consent is confirmed again after reload. If browser storage is unavailable, the participant can still submit and retries retain an in-memory request ID for the page. A successful submission offers a receipt containing the version and server-recorded consent time. This is not a cross-device participant account.
+
+## Phase 2.1: activity plans and private study hub
+
+Apply the researcher repository migration `202610280002_study_operations_activities.sql` before deploying either frontend. The researcher repository's `docs/phase2-activities-release.md` describes the coordinated release and verification.
+
+Multi-activity studies support baseline, follow-up, diary, and open-response activities with required steps and relative opening/due days. Participants separately accept research consent and activity linking, then use a private return link to access `/my-studies`, saved drafts, activity progress, consent receipts, study contacts, and coordinator-recorded handoff status. Return links grant access to that enrollment; their security notice is shown before joining and beside link controls. Remembering the link across browser restarts requires an explicit choice.
+
+Drafts save to the database and retain a tab-local backup. Revision checks prevent stale tabs from overwriting newer work, and participants can download a conflicting local copy. Enrollments retain their published study version. Optional activities do not increase the required completion count, and due dates allow late submissions.
+
+The multi-activity pilot uses anonymous study codes. Canvas studies continue through the existing single-activity flow. Compensation and credit statuses are manual coordinator records. Repeating diary schedules, account recovery, and reminders are later increments.

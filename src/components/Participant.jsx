@@ -5,6 +5,7 @@ import CanvasConnection, { useCanvas } from './CanvasConnection';
 import { canvasToken, submissionRequestId, submitCanvasStudy } from '../utils/canvas';
 import { readDraft, submissionArguments, usesCanvas } from '../utils/studyParticipation';
 import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
+import JoinActivityPlan from './JoinActivityPlan';
 import './Studies.css';
 
 export default function Participant() {
@@ -28,7 +29,8 @@ export default function Participant() {
   const withCanvas = study ? usesCanvas(study, Boolean(canvas.participant || canvas.error || canvasToken())) : false;
   const draftKey = study ? `eduthemes.draft.${code}.${study.version_id}.${withCanvas ? `canvas-${canvasToken()?.slice(-12) || 'pending'}` : 'anonymous'}` : null;
   const receiptKey = draftKey ? `${draftKey}.receipt` : null;
-  const preparingStudy = loading || resolvedCode !== code || Boolean(study && (canvas.loading || loadedDraftKey !== draftKey));
+  const multiActivity = Boolean(study?.activities?.length > 1);
+  const preparingStudy = loading || resolvedCode !== code || Boolean(study && !multiActivity && (canvas.loading || loadedDraftKey !== draftKey));
 
   useEffect(() => {
     setAnswers({}); setFinished(false); setReceipt(null); setAccepted(false); setConsented(false);
@@ -47,14 +49,14 @@ export default function Participant() {
   }, [code]);
   useEffect(() => { setShareDetails(false); }, [canvas.participant]);
   useEffect(() => {
-    if (!study || !draftKey || canvas.loading) return;
+    if (!study || multiActivity || !draftKey || canvas.loading) return;
     try {
       setAnswers(readDraft(window.sessionStorage, draftKey, study.questions));
       const savedReceipt = JSON.parse(window.sessionStorage.getItem(receiptKey) || 'null');
       setReceipt(savedReceipt); setFinished(Boolean(savedReceipt));
     } catch { setStorageWarning(true); setAnswers({}); }
     setLoadedDraftKey(draftKey);
-  }, [draftKey, canvas.loading, study, receiptKey]);
+  }, [draftKey, canvas.loading, study, receiptKey, multiActivity]);
   useEffect(() => {
     if (!draftKey || loadedDraftKey !== draftKey || finished) return;
     try { window.sessionStorage.setItem(draftKey, JSON.stringify(answers)); }
@@ -97,7 +99,9 @@ export default function Participant() {
   };
 
   if (!code) return <main className="study-shell participant-shell"><span className="study-eyebrow">Participant portal</span><h1>Join a study</h1><p>Enter the code your researcher shared with you.</p><CanvasConnection />
-    <form className="study-panel join-form" onSubmit={(event) => { event.preventDefault(); navigate(`/join/${entryCode.trim().toUpperCase()}`); }}><label htmlFor="study-code">Study code</label><input id="study-code" value={entryCode} onChange={(event) => setEntryCode(event.target.value)} required maxLength={12} autoComplete="off" placeholder="12-character code" /><button className="study-primary" type="submit">Continue</button></form></main>;
+    <form className="study-panel join-form" onSubmit={(event) => { event.preventDefault(); navigate(`/join/${entryCode.trim().toUpperCase()}`); }}><label htmlFor="study-code">Study code</label><input id="study-code" value={entryCode} onChange={(event) => setEntryCode(event.target.value)} required maxLength={12} autoComplete="off" placeholder="12-character code" /><button className="study-primary" type="submit">Continue</button></form><p><Link to="/my-studies">Return to my saved activities</Link></p></main>;
+
+  if (multiActivity && !loading && resolvedCode === code) return <JoinActivityPlan study={study} code={code} />;
 
   return <main className="study-shell participant-shell">
     <span className="study-eyebrow">Participant portal</span>
@@ -106,6 +110,9 @@ export default function Participant() {
       <p className="study-help">Submission reference: {receipt?.submission_id}</p><div className="study-actions"><button type="button" className="study-secondary" onClick={downloadReceipt}>Download study receipt</button><Link to="/">Join another study</Link></div>
     </section> : study ? <>
       <h1>{study.title}</h1><p className="study-version-label">Study version {study.version_number}</p>{study.description && <p className="study-intro">{study.description}</p>}
+      {study.activities?.[0]?.instructions && <p className="study-preserve-copy">{study.activities[0].instructions}</p>}
+      {study.contact_info && <p className="study-help study-preserve-copy"><strong>Study contact:</strong> {study.contact_info}</p>}
+      {study.compensation_details && <p className="study-note study-preserve-copy"><strong>Compensation or course credit:</strong> {study.compensation_details}</p>}
       {study.consent_required && !consented ? <section className="study-panel study-consent-panel"><h2>Before you take part</h2><p>Read the study information and decide whether you want to participate.</p><div className="study-consent-copy">{study.consent_text}</div>
         <form onSubmit={(event) => { event.preventDefault(); if (accepted) setConsented(true); }}><label className="study-consent-choice"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /> I have read the information above and agree to participate in this version of the study.</label><div className="study-actions"><button type="submit" className="study-primary" disabled={!accepted}>Agree and continue</button><Link to="/">Leave study</Link></div></form>
       </section> : <>

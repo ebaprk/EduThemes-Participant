@@ -6,3 +6,10 @@
 .site-brand__mark { display: block; flex: 0 0 auto; width: 36px; height: 36px; border: 1px solid rgba(19, 33, 28, .18); border-radius: 9px; }
 .site-brand__name { color: #13211c; font-family: var(--font-display); font-size: 1.13rem; font-weight: 600; letter-spacing: -.045em; }
 @media (max-width: 575px) { .site-header { min-height: 60px; padding: 8px 0; } .site-header__inner { width: min(100% - 28px, 1140px); height: 44px; } .site-brand__mark { width: 32px; height: 32px; border-radius: 8px; } .site-brand__name { font-size: 1.04rem; } }
+
+.site-header__inner { justify-content: space-between; gap: 20px; }
+.site-header nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 18px; }
+.site-header nav a { color: #176b52; font-size: .9rem; font-weight: 600; text-decoration: none; }
+.site-header nav a:hover { text-decoration: underline; }
+.site-header nav a:focus-visible { outline: 3px solid #b6e3c5; outline-offset: 5px; border-radius: 3px; }
+@media (max-width: 420px) { .site-header nav { gap: 12px; } .site-header nav a { font-size: .8rem; } .site-header__inner { gap: 12px; } }

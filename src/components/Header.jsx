@@ -10,6 +10,7 @@ export default function Header() {
           <img className="site-brand__mark" src="/eduthemes-mark.svg" alt="" width="34" height="34" aria-hidden="true" />
           <span className="site-brand__name">EduThemes</span>
         </Link>
+        <nav aria-label="Participant navigation"><Link to="/">Join a study</Link><Link to="/my-studies">My studies</Link></nav>
       </div>
     </header>
   );
