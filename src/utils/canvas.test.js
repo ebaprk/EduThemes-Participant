@@ -60,6 +60,20 @@ test('missing and expired Canvas sessions never fall back to anonymous submissio
   await assert.rejects(submitCanvasStudy('ABCDEF123456', { q: 'Answer' }, 'request'), /Session expired/);
 });
 
+test('versioned Canvas submissions carry consent independently of identity sharing', async () => {
+  browser();
+  window.sessionStorage.setItem('eduthemes.canvas.session', 'token');
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    assert.equal(body.version_id, 'version-2');
+    assert.equal(body.consent_accepted, true);
+    assert.equal(body.share_participant_details, true);
+    return { ok: true, status: 201, json: async () => ({ submission_id: 'saved' }) };
+  };
+  await submitCanvasStudy('ABCDEF123456', { q: 'Answer' }, 'request', { versionId: 'version-2', accepted: true });
+  assert.notEqual(submissionRequestId('ABCDEF123456', 'v1'), submissionRequestId('ABCDEF123456', 'v2'));
+});
+
 test('network failures retain the request ID so retry does not duplicate the response', async () => {
   browser();
   window.sessionStorage.setItem('eduthemes.canvas.session', 'token');
@@ -81,4 +95,12 @@ test('refreshing the Canvas landing page restores the session after its fragment
   const fresh = await import('./canvas.js?refresh-test');
   assert.deepEqual(await fresh.initializeCanvas(), { name: 'Restored student' });
   assert.equal(window.sessionStorage.getItem('eduthemes.canvas.session'), 'existing-session');
+});
+
+test('retry IDs survive denied browser storage and remain separate for different participant contexts', () => {
+  browser();
+  window.sessionStorage.getItem = () => { throw new Error('Storage denied'); };
+  const first = submissionRequestId('BLOCKED', 'v1', 'anonymous');
+  assert.equal(submissionRequestId('BLOCKED', 'v1', 'anonymous'), first);
+  assert.notEqual(submissionRequestId('BLOCKED', 'v1', 'canvas'), first);
 });

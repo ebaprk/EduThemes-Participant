@@ -1,8 +1,10 @@
 const TOKEN_KEY = 'eduthemes.canvas.session';
+const requestIds = new Map();
 const API_URL = (import.meta.env?.VITE_API_URL || (typeof process !== 'undefined' ? process.env.VITE_API_URL : '') || '').replace(/\/+$/, '');
 
 export function canvasToken() {
-  return window.sessionStorage.getItem(TOKEN_KEY);
+  try { return window.sessionStorage.getItem(TOKEN_KEY); }
+  catch { return null; }
 }
 
 export async function canvasRequest(path, { token, body, method = 'GET' } = {}) {
@@ -58,24 +60,33 @@ export async function disconnectCanvas() {
   initialization = Promise.resolve(null);
 }
 
-export function submitCanvasStudy(code, answers, requestId) {
+export function submitCanvasStudy(code, answers, requestId, consent = null) {
   const token = canvasToken();
   if (!token) throw new Error('Your Canvas connection is missing. Open EduThemes from Canvas again.');
   return canvasRequest('/submit', {
     method: 'POST', token,
-    body: { code, answers, request_id: requestId, share_participant_details: true },
+    body: { code, answers, request_id: requestId, share_participant_details: true,
+      ...(consent ? { version_id: consent.versionId, consent_accepted: consent.accepted } : {}) },
   });
 }
 
-export function submissionRequestId(code) {
-  const key = `eduthemes.canvas.submission.${code}`;
-  let id = window.sessionStorage.getItem(key);
-  if (!id) { id = crypto.randomUUID(); window.sessionStorage.setItem(key, id); }
-  return id;
+export function submissionRequestId(code, versionId = 'legacy', context = 'default') {
+  const key = `eduthemes.submission.${code}.${versionId}.${context}`;
+  try {
+    let id = window.sessionStorage.getItem(key);
+    if (!id) { id = requestIds.get(key) || crypto.randomUUID(); window.sessionStorage.setItem(key, id); }
+    requestIds.set(key, id);
+    return id;
+  } catch {
+    if (!requestIds.has(key)) requestIds.set(key, crypto.randomUUID());
+    return requestIds.get(key);
+  }
 }
 
-export function clearSubmissionRequestId(code) {
-  window.sessionStorage.removeItem(`eduthemes.canvas.submission.${code}`);
+export function clearSubmissionRequestId(code, versionId = 'legacy', context = 'default') {
+  const key = `eduthemes.submission.${code}.${versionId}.${context}`;
+  requestIds.delete(key);
+  try { window.sessionStorage.removeItem(key); } catch { /* In-memory retry state was cleared. */ }
 }
 
 export const canvasFields = [
