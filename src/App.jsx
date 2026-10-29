@@ -5,6 +5,7 @@ import Participant from './components/Participant';
 import StudyHub from './components/StudyHub';
 import { CanvasProvider } from './components/CanvasConnection';
 import './App.css';
+import './styles/ContextTheme.css';
 
 export default function App() {
   return (
