@@ -2,14 +2,24 @@
    Shared visual foundations are mirrored in the separate participant app. */
 :root {
   --edu-paper: #fbf8f3;
-  --edu-surface: #fffefd;
-  --edu-panel-soft: #f3f0e9;
-  --edu-ink: #1c2c26;
-  --edu-muted: #68716c;
-  --edu-primary: #22644c;
-  --edu-primary-dark: #174b38;
-  --edu-primary-soft: #edf3ec;
-  --edu-border: #dedfd6;
+  --edu-surface: #ffffff;
+  --edu-panel-soft: #f2eee6;
+  --edu-ink: #16202b;
+  --edu-muted: #4e5a68;
+  --edu-primary: #16202b;
+  --edu-primary-dark: #0f1720;
+  --edu-primary-soft: #edf4f8;
+  --edu-accent: #0b7ec5;
+  --edu-accent-ink: #0a5c92;
+  --edu-focus: rgba(11, 126, 197, .24);
+  --bs-primary: #0b7ec5;
+  --bs-primary-rgb: 11, 126, 197;
+  --bs-link-color: #0a5c92;
+  --bs-link-hover-color: #084b76;
+  --bs-border-color: #e5dfd4;
+  --bs-body-color: #16202b;
+  --bs-body-bg: #fbf8f3;
+  --edu-border: #e5dfd4;
   --edu-radius: 14px;
 }
 body, .App { background: var(--edu-paper); color: var(--edu-ink); }
@@ -17,7 +27,7 @@ body, .App { background: var(--edu-paper); color: var(--edu-ink); }
 .App :where(h1, h2, h3, h4, h5), .modal-title { font-family: var(--font-display); font-weight: 500; letter-spacing: -.025em; }
 .App :where(main, section, article, aside, fieldset, .card, .card-body, .row, [class*="col-"]) { min-width: 0; }
 .App :where(p, h1, h2, h3, h4, label, li, a) { overflow-wrap: anywhere; }
-.site-header, .site-header.navbar { min-height: 70px; padding: 10px 0; border-bottom: 1px solid var(--edu-border); background: rgba(251,248,243,.97); backdrop-filter: blur(12px); }
+.site-header, .site-header.navbar { min-height: 70px; padding: 10px 0; border-bottom: 1px solid var(--edu-border); background: rgba(251, 248, 243, .97); backdrop-filter: blur(12px); }
 .site-header .site-header__inner { display: flex; align-items: center; gap: 22px; width: calc(100% - 48px); max-width: none; height: 46px; padding: 0; margin: 0 auto; }
 .site-brand, .site-brand.navbar-brand { gap: 9px; flex-shrink: 0; }
 .site-brand__mark { width: 32px; height: 32px; border-radius: 8px; }
@@ -51,13 +61,13 @@ body, .App { background: var(--edu-paper); color: var(--edu-ink); }
 .study-actions { flex-wrap: wrap; gap: 10px; }
 .study-field { margin-bottom: 17px; gap: 6px; }
 .study-field label, .study-question-row label, .join-form label { font-size: .85rem; font-weight: 500; }
-.study-field input, .study-field select, .study-field textarea, .study-question-row textarea, .join-form input, .study-team select { padding: 10px 12px; border-color: #c9cfc5; border-radius: 9px; font-size: .9rem; }
+.study-field input, .study-field select, .study-field textarea, .study-question-row textarea, .join-form input, .study-team select { padding: 10px 12px; border-color: #c9c2b7; border-radius: 9px; font-size: .9rem; }
 .study-help { color: var(--edu-muted); font-size: .8rem; }
-.study-note { border: 1px solid #dbe6d8; background: var(--edu-primary-soft); color: #355942; font-size: .84rem; }
-.study-privacy { background: var(--edu-panel-soft); border-left-color: #91aa94; font-size: .87rem; }
+.study-note { border: 1px solid #d7e5ee; background: var(--edu-primary-soft); color: #334b61; font-size: .84rem; }
+.study-privacy { background: var(--edu-panel-soft); border-left-color: #0b7ec5; font-size: .87rem; }
 .study-list { gap: 16px; grid-template-columns: repeat(auto-fit,minmax(min(100%,290px),1fr)); }
 .study-list-card { min-height: 190px; display: flex; flex-direction: column; align-items: flex-start; transition: border-color .16s, background .16s; }
-.study-list-card:hover { transform: none; border-color: #99b29b; background: #fff; }
+.study-list-card:hover { transform: none; border-color: #8ebad5; background: #fff; }
 .study-list-card h2 { margin: 18px 0 8px; font-size: 1.38rem; }
 .study-list-card p { color: var(--edu-muted); font-size: .79rem; }
 .study-open-link { margin-top: auto; padding-top: 12px; font-size: .83rem; font-weight: 500; }
@@ -98,7 +108,7 @@ body, .App { background: var(--edu-paper); color: var(--edu-ink); }
 .participant-hub-workspace { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,345px); gap: 22px; align-items: start; margin-top: 22px; }
 .participant-hub-aside { display: grid; gap: 16px; }
 .participant-hub-aside > section, .participant-progress-panel, .participant-activity-list { margin-top: 0; }
-.participant-progress-panel { background: #f2f3eb; padding: 20px; }
+.participant-progress-panel { background: #f2eee6; padding: 20px; }
 .participant-progress-heading p { margin-bottom: 12px; color: var(--edu-muted); font-size: .84rem; }
 .participant-progress-panel progress { height: 9px; }
 .participant-activity-list { margin-block: 18px 0; gap: 16px; }
@@ -106,14 +116,14 @@ body, .App { background: var(--edu-paper); color: var(--edu-ink); }
 .participant-activity-heading { gap: 8px; margin-bottom: 14px; }
 .participant-activity-heading .study-version-label { text-transform: uppercase; letter-spacing: .05em; font-size: .67rem; }
 .participant-activity-status { background: var(--edu-panel-soft); font-size: .72rem; font-weight: 400; }
-.participant-activity-card.is-completed { background: #f3f7ef; border-color: #c3d3be; }
-.participant-activity-card.is-available, .participant-activity-card.is-in_progress { border-color: #9ab69f; }
+.participant-activity-card.is-completed { background: #f4f8fb; border-color: #c4d9e8; }
+.participant-activity-card.is-available, .participant-activity-card.is-in_progress { border-color: #8ebad5; }
 .participant-hub-aside p { font-size: .84rem; }
 .participant-hub-aside .study-actions { gap: 8px; }
 .participant-hub-aside .study-consent-choice { margin-bottom: 0; }
 .participant-study-details summary { font-size: .84rem; font-weight: 500; }
 .participant-activity-form { margin-top: 24px; }
-.edu-skeleton { background: #e8e8df; }
+.edu-skeleton { background: #e8e3da; }
 .edu-skeleton-panel { border-color: var(--edu-border); border-radius: var(--edu-radius); padding: 22px; }
 .edu-skeleton--heading { height: 2.15rem; }
 @media (max-width: 900px) {
@@ -138,3 +148,29 @@ body, .App { background: var(--edu-paper); color: var(--edu-ink); }
 .study-primary:disabled, .study-secondary:disabled, .study-text-button:disabled { cursor: not-allowed; }
 .study-primary[aria-busy="true"], .study-secondary[aria-busy="true"] { cursor: progress; }
 .participant-hub > .study-text-button { margin-left: 14px; }
+
+/* Match conText's charcoal controls, blue accents, and warm neutral panels. */
+.study-primary { color: #fff; }
+.study-secondary:hover { color: var(--edu-ink); }
+.study-shell a:not(.study-primary):not(.study-list-card),
+.workflow-page a, .study-text-button, .study-back,
+.study-open-link, .study-answer-list summary, .study-evidence summary,
+.study-history summary, .study-operations-settings summary,
+.participant-study-details summary { color: var(--edu-accent-ink); }
+.study-shell a { text-underline-offset: 3px; }
+.study-shell .study-primary:hover { color: #fff; }
+.study-status { color: var(--edu-ink); background: var(--edu-panel-soft); }
+.study-privacy { color: var(--edu-muted); border-left-color: var(--edu-accent); }
+.study-field :is(input,textarea,select):focus,
+.study-question-row textarea:focus, .join-form input:focus,
+.study-team select:focus { border-color: var(--edu-accent); outline: 3px solid var(--edu-focus); }
+.study-shell :is(button,a,summary):focus-visible,
+.site-header :is(a,button):focus-visible { outline: 2px solid var(--edu-accent); outline-offset: 3px; }
+.study-shell :is(input[type="checkbox"],progress) { accent-color: var(--edu-accent); }
+.study-shell progress { appearance: none; border: 0; border-radius: 99px; background: var(--edu-border); }
+.study-shell progress::-webkit-progress-bar { background: var(--edu-border); border-radius: 99px; }
+.study-shell progress::-webkit-progress-value { background: var(--edu-accent); border-radius: 99px; }
+.study-shell progress::-moz-progress-bar { background: var(--edu-accent); border-radius: 99px; }
+.App .form-control:focus, .App .form-select:focus { border-color: var(--edu-accent); box-shadow: 0 0 0 3px var(--edu-focus); }
+.App .progress-bar { background: var(--edu-accent); }
+.edu-loading__label, .edu-loading--inline { color: var(--edu-muted); }
