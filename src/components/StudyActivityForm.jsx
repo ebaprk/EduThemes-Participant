@@ -3,6 +3,7 @@ import { supabase } from '../supabase';
 import { submissionRequestId } from '../utils/canvas';
 import { answersFingerprint, browserStorage, recoverActivityDraft } from '../utils/studyHub';
 import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
+import StudyQuestionSlides, { StudyInformation, StudySlide } from './StudySlides';
 
 export default function StudyActivityForm({ accessKey, study, activity, progress, onBack, onDone }) {
   const localKey = `eduthemes.activity-draft.${accessKey.slice(-16)}.${activity.id}`;
@@ -96,22 +97,32 @@ export default function StudyActivityForm({ accessKey, study, activity, progress
     } catch (failure) { if (alive.current) setError(failure.message || 'Could not submit. Your answers are still here.'); }
     finally { if (alive.current) setSubmitting(false); }
   };
-  return <section className="study-panel participant-activity-form">
-    <span className="study-eyebrow">{activity.required ? 'Required activity' : 'Optional activity'}</span><h2>{activity.title}</h2>
-    {activity.instructions && <p className="study-preserve-copy">{activity.instructions}</p>}
-    {!consented ? <><h3>Review your study consent</h3><p>You are completing version {study.version_number}. Confirm the consent again before continuing this activity.</p><div className="study-consent-copy">{study.consent_text}</div>
-      <form onSubmit={(event) => { event.preventDefault(); if (accepted) setConsented(true); }}><label className="study-consent-choice"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /> I have read the information and agree to participate in this activity.</label><div className="study-actions"><button type="submit" className="study-primary" disabled={!accepted}>Agree and continue</button><button type="button" className="study-text-button" onClick={onBack}>Back to activities</button></div></form>
-    </> : <>
-      {backup && <div className="study-note"><p>This browser has an unsaved copy based on an older draft. The newer saved draft is shown below. Download the older copy if you need it before continuing.</p><div className="study-actions"><button type="button" className="study-secondary" onClick={() => download(backup)}>Download the older copy</button><button type="button" className="study-text-button" onClick={() => setBackup(null)}>Continue with the saved draft</button></div></div>}
+  const pending = submitting || leaving;
+  if (!consented) return <StudySlide studyTitle={study.title} context={activity.title} slideKey="activity-consent"
+    footer={<><span className="study-slides__footer-note">{activity.required ? 'Required' : 'Optional'} activity · {activity.questions.length} {activity.questions.length === 1 ? 'question' : 'questions'}</span><div className="study-slides__navigation"><button type="button" className="study-slides__back" onClick={onBack}>← Back to activities</button><button type="submit" form="activity-consent" className="study-primary study-slides__next" disabled={!accepted}>Agree and continue <span aria-hidden="true">→</span></button></div></>}>
+    <span className="study-slides__eyebrow">Before this activity</span><h1 data-slide-heading tabIndex={-1}>{activity.title}</h1>
+    {activity.instructions && <p className="study-slides__description">{activity.instructions}</p>}
+    <h2>Review your study consent</h2><p>You are completing version {study.version_number}. Confirm the consent again before continuing this activity.</p><div className="study-consent-copy">{study.consent_text}</div>
+    <form id="activity-consent" onSubmit={(event) => { event.preventDefault(); if (accepted) setConsented(true); }}><label className="study-consent-choice"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /> I have read the information and agree to participate in this activity.</label></form>
+    <StudyInformation study={study} />
+  </StudySlide>;
+
+  return <StudyQuestionSlides studyTitle={study.title} context={activity.title} questions={activity.questions} answers={answers}
+    onChange={(id, value) => setAnswers((current) => ({ ...current, [id]: value }))} onSubmit={submit} submitLabel="Submit this activity"
+    submitting={submitting} busy={leaving} blocked={Boolean(backup) || blocked.current}
+    onPrevious={() => { setAccepted(false); setConsented(false); }} error={error}
+    status={<div className="study-slides__save-status">
+      {submitting ? <LoadingSkeleton variant="inline" label="Submitting this activity and preparing your receipt…" /> : saving || leaving || (!saveError && answersFingerprint(answers) !== lastSaved.current) ? <LoadingSkeleton variant="inline" label={leaving ? 'Saving before returning to your activities…' : saving ? 'Saving your draft…' : 'Preparing to save your draft…'} /> : <span role="status">{saveError ? 'Your answers remain in this browser.' : 'Draft saved'}</span>}
+      <button type="button" className="study-text-button" disabled={pending} onClick={back} aria-busy={leaving}>{leaving && <Skeleton className="edu-skeleton--button" />}{blocked.current ? 'Return to saved activities' : 'Back to activities'}</button>
+    </div>}
+    notices={<>
+      {backup && <div className="study-note"><p>This browser has an unsaved copy based on an older draft. The newer saved draft is shown above. Download the older copy if you need it before continuing.</p><div className="study-actions"><button type="button" className="study-secondary" onClick={() => download(backup)}>Download the older copy</button><button type="button" className="study-text-button" onClick={() => setBackup(null)}>Continue with the saved draft</button></div></div>}
       {storageWarning && <p className="study-note" role="status">This browser cannot keep a local backup. Wait for “Draft saved” before leaving.</p>}
-      {saveError && <div className="study-error" role="alert"><p>{saveError}</p><div className="study-actions"><button type="button" className="study-secondary" onClick={() => download()}>Download unfinished answers</button>{!blocked.current && <button type="button" className="study-text-button" disabled={saving} onClick={() => save(answers).catch(() => {})}>Retry saving</button>}</div></div>}
-      {error && <p className="study-error" role="alert">{error}</p>}
-      <form onSubmit={submit}><fieldset className="participant-fields" disabled={submitting || leaving || Boolean(backup)} hidden={submitting}>
-        {activity.questions.map((question, index) => <div className="study-field" key={question.id}><label htmlFor={`activity-answer-${question.id}`}>{index + 1}. {question.prompt}</label><textarea id={`activity-answer-${question.id}`} value={answers[question.id] || ''} onChange={(event) => setAnswers((current) => ({ ...current, [question.id]: event.target.value }))} rows={5} maxLength={10000} required /></div>)}
-      </fieldset>
-        {submitting ? <LoadingSkeleton variant="connection" label="Submitting this activity and preparing your receipt…" /> : saving || leaving || (!saveError && answersFingerprint(answers) !== lastSaved.current) ? <LoadingSkeleton variant="inline" label={leaving ? 'Saving before returning to your activities…' : saving ? 'Saving your draft…' : 'Preparing to save your draft…'} /> : <p className="study-help" role="status">{saveError ? 'Your answers remain in this browser. Resolve the save error before leaving.' : 'Draft saved'}</p>}
-        <div className="study-actions"><button type="submit" className="study-primary" disabled={submitting || leaving || Boolean(backup) || blocked.current} aria-busy={submitting}>{submitting ? <><Skeleton className="edu-skeleton--button" />Submitting…</> : 'Submit this activity'}</button><button type="button" className="study-text-button" disabled={submitting || leaving} onClick={back} aria-busy={leaving}>{leaving && <Skeleton className="edu-skeleton--button" />}{blocked.current ? 'Return to saved activities' : 'Back to activities'}</button></div>
-      </form>
+      {saveError && <div className="study-error" role="alert"><p>{saveError}</p><div className="study-actions"><button type="button" className="study-secondary" onClick={() => download()}>Download unfinished answers</button>{!blocked.current && <button type="button" className="study-text-button" disabled={saving || pending} aria-busy={saving} onClick={() => save(answers).catch(() => {})}>{saving && <Skeleton className="edu-skeleton--button" />}Retry saving</button>}</div></div>}
     </>}
-  </section>;
+    information={<StudyInformation study={study}>
+      {activity.instructions && <p className="study-preserve-copy"><strong>Activity instructions:</strong> {activity.instructions}</p>}
+      <h2>Study consent</h2><div className="study-consent-copy">{study.consent_text}</div>
+      <button type="button" className="study-text-button" disabled={pending} onClick={() => { setAccepted(false); setConsented(false); }}>Return to consent</button>
+    </StudyInformation>} />;
 }

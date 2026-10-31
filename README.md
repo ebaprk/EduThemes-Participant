@@ -49,3 +49,22 @@ Multi-activity studies support baseline, follow-up, diary, and open-response act
 Drafts save to the database and retain a tab-local backup. Revision checks prevent stale tabs from overwriting newer work, and participants can download a conflicting local copy. Enrollments retain their published study version. Optional activities do not increase the required completion count, and due dates allow late submissions.
 
 The multi-activity pilot uses anonymous study codes. Canvas studies continue through the existing single-activity flow. Compensation and credit statuses are manual coordinator records. Repeating diary schedules, account recovery, and reminders are later increments.
+
+## One question at a time
+
+Participant study links open a welcome slide, followed by explicit consent and
+Canvas sharing when required. Each question appears on its own slide with an
+answer progress bar and Back/Next controls. Ctrl/Command + Enter advances a
+question; Enter in the answer field always adds a new line. Empty or whitespace-only
+answers cannot advance. A final review lets participants edit individual answers
+before submitting. Keyboard shortcuts never submit the review automatically.
+
+The same question slides serve single studies and hub activities. Existing draft
+recovery, background saves, conflict downloads, private links, consent records,
+and retry IDs remain in place. Saves retain entered content and use shared
+skeleton indicators. Long questions and consent stay scrollable, with reduced
+motion support and focus moving to each new question heading.
+
+After building this app, run `SCENARIO=participant npm run test:browser` from the
+researcher repository's `frontend` directory for the participant browser
+walkthroughs. These use synthetic studies and intercepted services.

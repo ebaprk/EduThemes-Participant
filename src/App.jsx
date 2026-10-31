@@ -11,7 +11,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <CanvasProvider><div className="App">
+        <a className="portal-skip-link" href="#participant-main">Skip to content</a>
         <Header />
+        <div className="participant-app-content" id="participant-main" tabIndex={-1}>
         <Routes>
           <Route path="/my-studies" element={<StudyHub />} />
           <Route path="/" element={<Participant />} />
@@ -19,7 +21,7 @@ export default function App() {
           <Route path="/join/:code" element={<Participant />} />
           <Route path="/canvas" element={<Participant />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        </Routes></div>
       </div></CanvasProvider>
     </BrowserRouter>
   );

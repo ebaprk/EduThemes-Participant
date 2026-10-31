@@ -4,8 +4,10 @@ import { supabase, supabaseConfigured } from '../supabase';
 import CanvasConnection, { useCanvas } from './CanvasConnection';
 import { canvasToken, submissionRequestId, submitCanvasStudy } from '../utils/canvas';
 import { readDraft, submissionArguments, usesCanvas } from '../utils/studyParticipation';
-import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
+import LoadingSkeleton from './LoadingSkeleton';
+import PortalIcon from './PortalIcon';
 import JoinActivityPlan from './JoinActivityPlan';
+import StudyQuestionSlides, { StudyInformation, StudySlide } from './StudySlides';
 import './Studies.css';
 
 export default function Participant() {
@@ -13,6 +15,7 @@ export default function Participant() {
   const navigate = useNavigate();
   const canvas = useCanvas();
   const [shareDetails, setShareDetails] = useState(false);
+  const [step, setStep] = useState('welcome');
   const [entryCode, setEntryCode] = useState('');
   const [study, setStudy] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -34,7 +37,7 @@ export default function Participant() {
 
   useEffect(() => {
     setAnswers({}); setFinished(false); setReceipt(null); setAccepted(false); setConsented(false);
-    setShareDetails(false); setLoadedDraftKey(null); setStudy(null);
+    setStep('welcome'); setShareDetails(false); setLoadedDraftKey(null); setStudy(null);
     if (!code || !supabase) { setLoading(false); return undefined; }
     let active = true;
     setLoading(true); setError('');
@@ -98,39 +101,62 @@ export default function Participant() {
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = `eduthemes-consent-v${study.version_number}.json`; anchor.click(); URL.revokeObjectURL(url);
   };
 
-  if (!code) return <main className="study-shell participant-shell"><span className="study-eyebrow">Participant portal</span><h1>Join a study</h1><p>Enter the code your researcher shared with you.</p><CanvasConnection />
-    <form className="study-panel join-form" onSubmit={(event) => { event.preventDefault(); navigate(`/join/${entryCode.trim().toUpperCase()}`); }}><label htmlFor="study-code">Study code</label><input id="study-code" value={entryCode} onChange={(event) => setEntryCode(event.target.value)} required maxLength={12} autoComplete="off" placeholder="12-character code" /><button className="study-primary" type="submit">Continue</button></form><p><Link to="/my-studies">Return to my saved activities</Link></p></main>;
+  if (!code) return <main className="study-shell participant-shell participant-landing">
+    <header className="participant-page-heading"><span className="study-eyebrow">PARTICIPANT PORTAL</span><h1>Join a study<span className="portal-title-period">.</span></h1><p>Enter your researcher’s code to get started.</p></header>
+    <div className="portal-landing-grid"><div>
+      <section className="study-panel portal-join-panel"><span className="portal-panel-icon"><PortalIcon name="flask" /></span><h2>Have a study code?</h2><p>Your researcher will share a code or a link to their study.</p>
+        <form className="join-form" onSubmit={(event) => { event.preventDefault(); navigate(`/join/${entryCode.trim().toUpperCase()}`); }}><label htmlFor="study-code">Study code</label><input id="study-code" value={entryCode} onChange={(event) => setEntryCode(event.target.value.toUpperCase())} required maxLength={12} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Enter your study code" aria-describedby="study-code-help" /><p id="study-code-help" className="study-help">Use the 12-character code your researcher shared.</p><button className="study-primary" type="submit">Continue<PortalIcon name="arrow" /></button></form>
+      </section>
+      <Link className="portal-return-card" to="/my-studies"><span><PortalIcon name="key" /></span><div><strong>Already taking part?</strong><p>Return to your saved studies and activities.</p></div><PortalIcon name="arrow" /></Link>
+      <details className="portal-canvas-details"><summary>Taking part through Canvas?</summary><CanvasConnection /></details>
+    </div><aside className="portal-guide" aria-label="What to expect"><span className="study-eyebrow">WHAT TO EXPECT</span><h2>Your perspective<br />makes a difference.</h2><p>A few thoughtful steps, at your own pace.</p><ol><li><span>01</span><div><h3>Find your study</h3><p>Use a code or open the link shared by your research team.</p></div></li><li><span>02</span><div><h3>Choose to take part</h3><p>Read the information and decide whether to give your consent.</p></div></li><li><span>03</span><div><h3>Share your perspective</h3><p>Answer one question at a time, then review before submitting.</p></div></li></ol><div className="portal-guide-note"><PortalIcon name="shield" /><span>Your participation is always your choice.</span></div></aside></div>
+    <footer className="portal-page-footer"><span>EduThemes · Educational research</span><span>Participant portal</span></footer>
+  </main>;
 
   if (multiActivity && !loading && resolvedCode === code) return <JoinActivityPlan study={study} code={code} />;
 
-  return <main className="study-shell participant-shell">
-    <span className="study-eyebrow">Participant portal</span>
-    {!supabaseConfigured ? <p role="alert">This site has not been connected to Supabase yet.</p> : preparingStudy ? <LoadingSkeleton variant="study" rows={2} label="Loading your study…" /> : finished ? <section className="study-panel" role="status"><h1>Thank you for participating</h1><p>Your responses were submitted successfully for version {study.version_number} of this study.</p>
-      {receipt?.consent_accepted_at && <p>Consent recorded {new Date(receipt.consent_accepted_at).toLocaleString()}.</p>}
-      <p className="study-help">Submission reference: {receipt?.submission_id}</p><div className="study-actions"><button type="button" className="study-secondary" onClick={downloadReceipt}>Download study receipt</button><Link to="/">Join another study</Link></div>
-    </section> : study ? <>
-      <h1>{study.title}</h1><p className="study-version-label">Study version {study.version_number}</p>{study.description && <p className="study-intro">{study.description}</p>}
-      {study.activities?.[0]?.instructions && <p className="study-preserve-copy">{study.activities[0].instructions}</p>}
-      {study.contact_info && <p className="study-help study-preserve-copy"><strong>Study contact:</strong> {study.contact_info}</p>}
-      {study.compensation_details && <p className="study-note study-preserve-copy"><strong>Compensation or course credit:</strong> {study.compensation_details}</p>}
-      {study.consent_required && !consented ? <section className="study-panel study-consent-panel"><h2>Before you take part</h2><p>Read the study information and decide whether you want to participate.</p><div className="study-consent-copy">{study.consent_text}</div>
-        <form onSubmit={(event) => { event.preventDefault(); if (accepted) setConsented(true); }}><label className="study-consent-choice"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /> I have read the information above and agree to participate in this version of the study.</label><div className="study-actions"><button type="submit" className="study-primary" disabled={!accepted}>Agree and continue</button><Link to="/">Leave study</Link></div></form>
-      </section> : <>
-        <p className="study-privacy">{withCanvas ? 'Your answers and the Canvas details you confirm below are shared with this study’s research team.' : 'This study collects anonymous responses. Canvas details are not attached to your answers.'}</p>
-        {study.consent_required && <details className="study-consent-reminder"><summary>Review the consent you accepted</summary><div className="study-consent-copy">{study.consent_text}</div><button type="button" className="study-text-button" onClick={() => { setAccepted(false); setConsented(false); }}>Return to consent</button></details>}
-        {study.participant_mode !== 'anonymous' && <CanvasConnection requiredForStudy={study.participant_mode === 'canvas'} />}
-        {study.participant_mode === 'canvas' && !canvas.participant && <p className="study-error" role="alert">This study requires verified Canvas details. Open EduThemes from your Canvas course, then enter this study code.</p>}
-        {storageWarning && <p className="study-note" role="status">This browser cannot save your draft. Keep this page open until you submit.</p>}
-        <form className="study-panel participant-form" onSubmit={submit}>
-          <fieldset className="participant-fields" disabled={submitting} hidden={submitting}>
-          {(study.questions || []).map((question, index) => <div className="study-field" key={question.id}><label htmlFor={`answer-${question.id}`}>{index + 1}. {question.prompt}</label><textarea id={`answer-${question.id}`} value={answers[question.id] || ''} onChange={(event) => setAnswers((previous) => ({ ...previous, [question.id]: event.target.value }))} rows={5} maxLength={10000} required /></div>)}
-          {withCanvas && canvas.participant && <label className="canvas-consent"><input type="checkbox" checked={shareDetails} onChange={(event) => setShareDetails(event.target.checked)} required /> I agree to include the Canvas details shown above with my answers to this study.</label>}
-          </fieldset>
-          {submitting && <LoadingSkeleton variant="connection" label="Submitting your responses and preparing your receipt…" />}
-          {error && <p className="study-error" role="alert">{error}</p>}
-          <button className="study-primary" type="submit" aria-busy={submitting} disabled={submitting || (withCanvas && (canvas.loading || Boolean(canvas.error) || !canvas.participant || !shareDetails))}>{submitting ? <><Skeleton className="edu-skeleton--button" />Submitting…</> : 'Submit responses'}</button>
+  const openQuestions = () => setStep(withCanvas ? 'identity' : 'questions');
+  const returnToConsent = () => { setAccepted(false); setConsented(false); setStep('consent'); };
+  const information = study && <StudyInformation study={study}>
+    <p className="study-privacy">{withCanvas ? 'Your answers and the Canvas details you confirm are shared with this study’s research team.' : 'This study collects anonymous responses. Canvas details are not attached to your answers.'}</p>
+    {study.consent_required && <><h2>Study consent</h2><div className="study-consent-copy">{study.consent_text}</div><button type="button" className="study-text-button" disabled={submitting} onClick={returnToConsent}>Return to consent</button></>}
+    {withCanvas && <><CanvasConnection requiredForStudy={study.participant_mode === 'canvas'} /><button type="button" className="study-text-button" disabled={submitting} onClick={() => setStep('identity')}>Review Canvas sharing</button></>}
+  </StudyInformation>;
+
+  return <main className="study-shell participant-shell participant-flow-shell">
+    {!supabaseConfigured ? <StudySlide context="Participant portal" slideKey="configuration"><h1 data-slide-heading tabIndex={-1}>Study service unavailable</h1><p role="alert">This site has not been connected to Supabase yet.</p></StudySlide>
+      : preparingStudy ? <div className="study-slides"><div className="study-slides__loading"><LoadingSkeleton variant="form" rows={1} label="Loading your study…" /></div></div>
+      : finished ? <StudySlide studyTitle={study.title} context="Study complete" slideKey="complete" progress={1} total={1} progressLabel="Responses submitted"
+        footer={<><span className="study-slides__footer-note">Thank you for sharing your perspective.</span><div className="study-slides__navigation"><button type="button" className="study-secondary" onClick={downloadReceipt}>Download study receipt</button><Link to="/">Join another study</Link></div></>}>
+        <span className="study-slides__success" aria-hidden="true">✓</span><span className="study-slides__eyebrow">All done</span>
+        <h1 data-slide-heading tabIndex={-1}>Thank you for participating</h1><p className="study-slides__description">Your responses were submitted successfully for version {study.version_number} of this study.</p>
+        {receipt?.consent_accepted_at && <p className="study-help">Consent recorded {new Date(receipt.consent_accepted_at).toLocaleString()}.</p>}
+        <p className="study-help">Submission reference: {receipt?.submission_id}</p>
+      </StudySlide> : !study ? <StudySlide context="Participant portal" slideKey="unavailable"><h1 data-slide-heading tabIndex={-1}>Study unavailable</h1><p className="study-error" role="alert">{error}</p><Link to="/">Enter another code</Link></StudySlide>
+      : step === 'welcome' ? <StudySlide studyTitle={`Study version ${study.version_number}`} context="Welcome to your study" slideKey="welcome"
+        footer={<><span className="study-slides__footer-note">Take your time. Your perspective matters.</span><div className="study-slides__navigation"><Link to="/">Leave study</Link><button type="button" className="study-primary study-slides__next" onClick={() => study.consent_required && !consented ? setStep('consent') : openQuestions()}>Start study <span aria-hidden="true">→</span></button></div></>}>
+        <span className="study-slides__eyebrow">A little reflection. A valuable perspective.</span><h1 data-slide-heading tabIndex={-1}>{study.title}</h1>
+        {study.description && <p className="study-slides__description">{study.description}</p>}
+        <div className="study-slides__facts"><span>{study.questions.length} {study.questions.length === 1 ? 'question' : 'questions'}</span><span>One question at a time</span><span>{withCanvas ? 'Canvas-identified study' : 'Anonymous responses'}</span></div>
+        {study.activities?.[0]?.instructions && <p className="study-preserve-copy">{study.activities[0].instructions}</p>}
+        <StudyInformation study={study} />
+      </StudySlide> : step === 'consent' ? <StudySlide studyTitle={study.title} context="Before we begin" slideKey="consent"
+        footer={<><span className="study-slides__footer-note">Taking part is your choice.</span><div className="study-slides__navigation"><button type="button" className="study-slides__back" onClick={() => setStep('welcome')}>← Back</button><Link to="/">Leave study</Link><button type="submit" form="study-consent" className="study-primary study-slides__next" disabled={!accepted}>Agree and continue <span aria-hidden="true">→</span></button></div></>}>
+        <span className="study-slides__eyebrow">Your participation</span><h1 data-slide-heading tabIndex={-1}>Before you take part</h1><p className="study-slides__description">Read the study information and decide whether you want to participate.</p><div className="study-consent-copy">{study.consent_text}</div>
+        <form id="study-consent" onSubmit={(event) => { event.preventDefault(); if (accepted) { setConsented(true); openQuestions(); } }}><label className="study-consent-choice"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required /> I have read the information above and agree to participate in this version of the study.</label></form>
+        <StudyInformation study={study} />
+      </StudySlide> : step === 'identity' ? <StudySlide studyTitle={study.title} context="Your Canvas connection" slideKey="identity"
+        footer={<><span className="study-slides__footer-note">Review the details shared with the study team.</span><div className="study-slides__navigation"><button type="button" className="study-slides__back" onClick={() => setStep(study.consent_required ? 'consent' : 'welcome')}>← Back</button><button type="submit" form="canvas-sharing" className="study-primary study-slides__next" disabled={!canvas.participant || !shareDetails || canvas.loading || Boolean(canvas.error)}>Continue to questions <span aria-hidden="true">→</span></button></div></>}>
+        <span className="study-slides__eyebrow">One more thing</span><h1 data-slide-heading tabIndex={-1}>Confirm what you share</h1><CanvasConnection requiredForStudy={study.participant_mode === 'canvas'} />
+        {!canvas.participant && <p className="study-error" role="alert">This study requires verified Canvas details. Open EduThemes from your Canvas course, then enter this study code.</p>}
+        <form id="canvas-sharing" onSubmit={(event) => { event.preventDefault(); if (canvas.participant && shareDetails && !canvas.loading && !canvas.error) setStep('questions'); }}>
+          {canvas.participant && <label className="study-consent-choice"><input type="checkbox" checked={shareDetails} onChange={(event) => setShareDetails(event.target.checked)} required /> I agree to include the Canvas details shown above with my answers to this study.</label>}
         </form>
-      </>}
-    </> : <section className="study-panel"><h1>Study unavailable</h1><p role="alert">{error}</p><Link to="/">Enter another code</Link></section>}
+      </StudySlide> : <StudyQuestionSlides studyTitle={study.title} context="Your perspective" questions={study.questions || []} answers={answers}
+        onChange={(id, value) => setAnswers((previous) => ({ ...previous, [id]: value }))} onSubmit={submit} submitting={submitting}
+        onPrevious={() => setStep(withCanvas ? 'identity' : study.consent_required ? 'consent' : 'welcome')}
+        submitDisabled={withCanvas && (canvas.loading || Boolean(canvas.error) || !canvas.participant || !shareDetails)}
+        notices={<>{storageWarning && <p className="study-note" role="status">This browser cannot save your draft. Keep this page open until you submit.</p>}{withCanvas && (!canvas.participant || !shareDetails || canvas.error) && <p className="study-error" role="alert">Review your Canvas connection and sharing choice in Study information before submitting.</p>}</>}
+        status={submitting ? <LoadingSkeleton variant="inline" label="Submitting your responses and preparing your receipt…" /> : undefined} information={information} error={error} />}
   </main>;
 }
