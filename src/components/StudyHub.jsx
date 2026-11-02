@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase, supabaseConfigured } from '../supabase';
 import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
 import StudyActivityForm from './StudyActivityForm';
+import RecruitmentStatus from './RecruitmentStatus';
 import PortalIcon from './PortalIcon';
 import { browserStorage, parseStudyKey, persistentStudyLinks, privateStudyUrl, readStudyLinks,
   removeStudyLink, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
@@ -51,11 +52,12 @@ export default function StudyHub() {
     const request = ++generation.current;
     if (initial) setLoading(true); else setRefreshing(true);
     try {
-      const { data, error: failure } = await supabase.rpc('get_participant_study', { p_access_key: accessKey });
+      const { data, error: failure } = await supabase.rpc('get_participant_portal', { p_access_key: accessKey });
       if (request !== generation.current) return;
       if (failure) throw failure;
       setStudy(data);
-      const record = { key: accessKey, title: data.title, version: data.version_number, reference: data.participant_reference };
+      const info = data.screening || data;
+      const record = { key: accessKey, title: info.title, version: info.version_number, reference: info.participant_reference || info.reference };
       const remembered = readStudyLinks(browserStorage('localStorage'), persistentStudyLinks).some((item) => item.key === accessKey);
       if (initial) setRemember(remembered);
       try {
@@ -72,7 +74,7 @@ export default function StudyHub() {
   const updateRemember = (checked) => {
     setRemember(checked);
     try {
-      if (checked) storeStudyLink(browserStorage('localStorage'), persistentStudyLinks, { key: accessKey, title: study.title, version: study.version_number, reference: study.participant_reference });
+      if (checked) storeStudyLink(browserStorage('localStorage'), persistentStudyLinks, { key: accessKey, title: (study.screening || study).title, version: (study.screening || study).version_number, reference: study.screening?.reference || study.participant_reference });
       else removeStudyLink(browserStorage('localStorage'), persistentStudyLinks, accessKey);
       setLinks(savedStudies());
     } catch { setStorageWarning(true); setRemember(false); }
@@ -98,8 +100,10 @@ export default function StudyHub() {
     finally { if (key === currentKey.current) setStarting(null); }
   };
   useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }, [resolvedKey, editor?.activity.id]);
-  const required = study?.activities.filter((activity) => activity.required) || [];
+  const required = study?.activities?.filter((activity) => activity.required) || [];
   const completed = required.filter((activity) => activity.status === 'completed').length;
+
+  if (study?.screening && !loading && resolvedKey === accessKey) return <RecruitmentStatus key={accessKey} screening={study.screening} accessKey={accessKey} refreshing={refreshing} onRefresh={() => { setError(''); load(); }} onJoined={() => load()} onBack={backToList} copyLink={copyLink} downloadLink={() => download(privateStudyUrl(window.location.origin, accessKey), 'eduthemes-private-study-link.txt', 'text/plain')} remember={remember} onRemember={updateRemember} error={error} notice={notice} storageWarning={storageWarning} />;
 
   if (editor && study) return <main className="study-shell participant-shell participant-flow-shell"><StudyActivityForm key={`${accessKey}.${editor.activity.id}`} accessKey={accessKey} study={study} activity={editor.activity} progress={editor.progress}
         onBack={async () => { setEditor(null); await load(); }} onDone={async () => { setEditor(null); setNotice('Activity submitted. Its consent receipt is available below.'); await load(); }} /></main>;
@@ -109,7 +113,7 @@ export default function StudyHub() {
     {!accessKey ? <><h1>Your next activity starts here</h1><p>Open a saved study, or paste the private return link you received when you joined.</p>
       {error && <p className="study-error" role="alert">{error}</p>}
       <div className="portal-return-workspace"><div className="portal-return-main"><form className="study-panel join-form portal-private-form" onSubmit={(event) => { event.preventDefault(); const key = parseStudyKey(linkInput); if (key) { open(key); setLinkInput(''); } else setError('Paste a complete private return link or a 64-character study key.'); }}><span className="portal-panel-icon"><PortalIcon name="key" /></span><h2>Continue your study</h2><p>Use the private link you received when you joined.</p><label htmlFor="private-study-link">Private return link or study key</label><input id="private-study-link" type="password" autoComplete="off" spellCheck={false} value={linkInput} onChange={(event) => setLinkInput(event.target.value)} required placeholder="Paste your private link or study key" /><button type="submit" className="study-primary">Open my study<PortalIcon name="arrow" /></button></form>
-      {links.length ? <section className="participant-saved-studies"><h2>Saved in this browser</h2>{links.map((item) => <article className="study-panel participant-saved-study" key={item.key}><span className="study-version-label">Version {item.version} · {item.reference}</span><h3>{item.title}</h3><button type="button" className="study-secondary" onClick={() => open(item.key)}>Open activities</button></article>)}</section> : <section className="study-panel participant-saved-study portal-saved-empty"><span className="portal-panel-icon"><PortalIcon name="folder" /></span><h2>No saved return links yet</h2><p>After you join a study with multiple activities, its private return link will open your progress here.</p><Link to="/">Join a study with a researcher’s code</Link></section>}
+      {links.length ? <section className="participant-saved-studies"><h2>Saved in this browser</h2>{links.map((item) => <article className="study-panel participant-saved-study" key={item.key}><span className="study-version-label">Version {item.version} · {item.reference}</span><h3>{item.title}</h3><button type="button" className="study-secondary" onClick={() => open(item.key)}>Open study</button></article>)}</section> : <section className="study-panel participant-saved-study portal-saved-empty"><span className="portal-panel-icon"><PortalIcon name="folder" /></span><h2>No saved return links yet</h2><p>After screening or joining a study, its private return link will open your status and progress here.</p><Link to="/">Join a study with a researcher’s code</Link></section>}
       </div><aside className="portal-access-guide"><span className="portal-panel-icon"><PortalIcon name="shield" /></span><h2>Keep your way back</h2><p>Your private return link opens your study progress and saved answers.</p><ul><li>Use the same link on another device to continue.</li><li>Save a copy somewhere only you can access.</li><li>Choose whether this browser remembers it.</li></ul><p className="study-help">If you only have a researcher’s study code, join the study first to receive a private return link.</p><Link to="/">Join a study<PortalIcon name="arrow" /></Link></aside></div>
     </> : !supabaseConfigured ? <p className="study-error" role="alert">This site has not been connected to its study service.</p> : loading || resolvedKey !== accessKey ? <LoadingSkeleton variant="study" rows={2} label="Opening your private study and saved progress…" /> : !study ? <><h1>Open your private study</h1>{error && <p className="study-error" role="alert">{error}</p>}<div className="study-actions"><button type="button" className="study-primary" onClick={() => { setError(''); load(true); }}>Try again</button><button type="button" className="study-text-button" onClick={backToList}>Return to saved studies</button></div></> : <>
       <button type="button" className="study-text-button" disabled={Boolean(editor) || Boolean(starting)} onClick={backToList}>← Saved studies</button>

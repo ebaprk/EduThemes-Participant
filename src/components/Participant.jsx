@@ -7,6 +7,7 @@ import { readDraft, submissionArguments, usesCanvas } from '../utils/studyPartic
 import LoadingSkeleton from './LoadingSkeleton';
 import PortalIcon from './PortalIcon';
 import JoinActivityPlan from './JoinActivityPlan';
+import StudyScreener from './StudyScreener';
 import StudyQuestionSlides, { StudyInformation, StudySlide } from './StudySlides';
 import './Studies.css';
 
@@ -112,6 +113,8 @@ export default function Participant() {
     </div><aside className="portal-guide" aria-label="What to expect"><span className="study-eyebrow">WHAT TO EXPECT</span><h2>Your perspective<br />makes a difference.</h2><p>A few thoughtful steps, at your own pace.</p><ol><li><span>01</span><div><h3>Find your study</h3><p>Use a code or open the link shared by your research team.</p></div></li><li><span>02</span><div><h3>Choose to take part</h3><p>Read the information and decide whether to give your consent.</p></div></li><li><span>03</span><div><h3>Share your perspective</h3><p>Answer one question at a time, then review before submitting.</p></div></li></ol><div className="portal-guide-note"><PortalIcon name="shield" /><span>Your participation is always your choice.</span></div></aside></div>
     <footer className="portal-page-footer"><span>EduThemes · Educational research</span><span>Participant portal</span></footer>
   </main>;
+
+  if (study?.recruitment?.enabled && !loading && resolvedCode === code) return <StudyScreener key={`${code}:${study.version_id}`} study={study} code={code} />;
 
   if (multiActivity && !loading && resolvedCode === code) return <JoinActivityPlan study={study} code={code} />;
 

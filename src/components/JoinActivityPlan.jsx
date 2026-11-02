@@ -5,7 +5,7 @@ import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
 import { StudyInformation, StudySlide } from './StudySlides';
 import { browserStorage, pendingStudyKey, persistentStudyLinks, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
 
-export default function JoinActivityPlan({ study, code }) {
+export default function JoinActivityPlan({ study, code, recruitmentKey, onJoined, onCancel }) {
   const navigate = useNavigate();
   const [step, setStep] = useState('plan');
   const [accepted, setAccepted] = useState(false);
@@ -17,8 +17,8 @@ export default function JoinActivityPlan({ study, code }) {
     event.preventDefault(); if (joining || !accepted || !linked) return;
     setJoining(true); setError('');
     try {
-      const key = pendingStudyKey(browserStorage('sessionStorage'), code, study.version_id);
-      const { data, error: failure } = await supabase.rpc('enroll_study', {
+      const key = recruitmentKey || pendingStudyKey(browserStorage('sessionStorage'), code, study.version_id);
+      const { data, error: failure } = await supabase.rpc(recruitmentKey ? 'enroll_recruited_study' : 'enroll_study', recruitmentKey ? { p_access_key:key, p_consent_accepted:accepted, p_linking_accepted:linked } : {
         p_code: code, p_version_id: study.version_id, p_access_key: key,
         p_consent_accepted: accepted, p_linking_accepted: linked,
       });
@@ -28,13 +28,13 @@ export default function JoinActivityPlan({ study, code }) {
         storeStudyLink(browserStorage('sessionStorage'), sessionStudyLinks, record);
         if (remember) storeStudyLink(browserStorage('localStorage'), persistentStudyLinks, record);
       } catch { /* The private return link remains available on the next screen. */ }
-      navigate(`/my-studies#access=${key}`);
+      if (onJoined) await onJoined(); else navigate(`/my-studies#access=${key}`);
     } catch (failure) { setError(failure.message || 'Could not join. Your choices are still here; please try again.'); }
     finally { setJoining(false); }
   };
   return <main className="study-shell participant-shell participant-flow-shell">
     {step === 'plan' ? <StudySlide studyTitle={`Version ${study.version_number} · ${study.activities.length} activities`} context="Welcome to your study" slideKey="plan"
-      footer={<><span className="study-slides__footer-note">You can return between activities.</span><div className="study-slides__navigation"><Link to="/my-studies">I have a private return link</Link><button type="button" className="study-primary study-slides__next" onClick={() => setStep('consent')}>Review study consent <span aria-hidden="true">→</span></button></div></>}>
+      footer={<><span className="study-slides__footer-note">You can return between activities.</span><div className="study-slides__navigation">{onCancel ? <button type="button" className="study-slides__back" onClick={onCancel}>← Back to recruitment status</button> : <Link to="/my-studies">I have a private return link</Link>}<button type="button" className="study-primary study-slides__next" onClick={() => setStep('consent')}>Review study consent <span aria-hidden="true">→</span></button></div></>}>
       <span className="study-slides__eyebrow">Your activity plan</span><h1 data-slide-heading tabIndex={-1}>{study.title}</h1>
       {study.description && <p className="study-slides__description">{study.description}</p>}
       <ol className="participant-plan-list">{study.activities.map((activity) => <li key={activity.id}><strong>{activity.title}</strong><span>{activity.required ? 'Required' : 'Optional'} · Opens on day {activity.opens_after_days}{activity.due_after_days != null ? ` · Due on day ${activity.due_after_days}` : ''} after joining</span></li>)}</ol>
