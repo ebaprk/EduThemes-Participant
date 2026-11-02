@@ -49,3 +49,5 @@
 }
 @media (max-width: 600px) { .participant-workspace-header { min-height: 63px; padding-inline: 18px; gap: 12px; } .portal-brand { font-size: 1.05rem; gap: 7px; } .portal-brand img { width: 27px; height: 27px; } .portal-mobile-navigation a { padding-inline: 8px; font-size: .72rem; } .portal-header-label { font-size: .7rem; } }
 @media (max-width: 350px) { .participant-workspace-header { padding-inline: 12px; gap: 7px; } .portal-brand { font-size: .95rem; } .portal-mobile-navigation a { font-size: .67rem; padding-inline: 6px; } }
+
+@media (max-width:600px) { .participant-workspace-header:has(.portal-mobile-navigation) { flex-wrap:wrap; gap:4px 12px; padding-top:12px; padding-bottom:6px; }.portal-mobile-navigation { order:2; flex:0 0 100%; margin-left:0; justify-content:space-between; }.portal-mobile-navigation a { flex:1; }.App:has(.participant-flow-shell) .participant-workspace-header { flex-wrap:nowrap; padding-block:0; } }

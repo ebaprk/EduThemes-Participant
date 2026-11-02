@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Participant from './components/Participant';
 import StudyHub from './components/StudyHub';
+import ParticipantResults from './components/ParticipantResults';
 import { CanvasProvider } from './components/CanvasConnection';
 import './App.css';
 import './styles/ContextTheme.css';
@@ -17,6 +18,7 @@ export default function App() {
         <div className="participant-app-content" id="participant-main" tabIndex={-1}>
         <Routes>
           <Route path="/my-studies" element={<StudyHub />} />
+          <Route path="/results" element={<ParticipantResults />} />
           <Route path="/" element={<Participant />} />
           <Route path="/join" element={<Participant />} />
           <Route path="/join/:code" element={<Participant />} />

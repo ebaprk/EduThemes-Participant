@@ -6,6 +6,7 @@ import { canvasToken, submissionRequestId, submitCanvasStudy } from '../utils/ca
 import { readDraft, submissionArguments, usesCanvas } from '../utils/studyParticipation';
 import LoadingSkeleton from './LoadingSkeleton';
 import PortalIcon from './PortalIcon';
+import { privateResultsPath, resultsCredentials } from '../utils/participantResults';
 import JoinActivityPlan from './JoinActivityPlan';
 import StudyScreener from './StudyScreener';
 import StudyQuestionSlides, { StudyInformation, StudySlide } from './StudySlides';
@@ -27,6 +28,7 @@ export default function Participant() {
   const [submitting, setSubmitting] = useState(false);
   const [finished, setFinished] = useState(false);
   const [receipt, setReceipt] = useState(null);
+  const [resultsAccess, setResultsAccess] = useState(null);
   const [error, setError] = useState('');
   const [storageWarning, setStorageWarning] = useState(false);
   const [loadedDraftKey, setLoadedDraftKey] = useState(null);
@@ -37,7 +39,7 @@ export default function Participant() {
   const preparingStudy = loading || resolvedCode !== code || Boolean(study && !multiActivity && (canvas.loading || loadedDraftKey !== draftKey));
 
   useEffect(() => {
-    setAnswers({}); setFinished(false); setReceipt(null); setAccepted(false); setConsented(false);
+    setAnswers({}); setFinished(false); setReceipt(null); setResultsAccess(null); setAccepted(false); setConsented(false);
     setStep('welcome'); setShareDetails(false); setLoadedDraftKey(null); setStudy(null);
     if (!code || !supabase) { setLoading(false); return undefined; }
     let active = true;
@@ -58,6 +60,7 @@ export default function Participant() {
       setAnswers(readDraft(window.sessionStorage, draftKey, study.questions));
       const savedReceipt = JSON.parse(window.sessionStorage.getItem(receiptKey) || 'null');
       setReceipt(savedReceipt); setFinished(Boolean(savedReceipt));
+      setResultsAccess(resultsCredentials(JSON.parse(window.sessionStorage.getItem(`${receiptKey}.results`) || 'null')));
     } catch { setStorageWarning(true); setAnswers({}); }
     setLoadedDraftKey(draftKey);
   }, [draftKey, canvas.loading, study, receiptKey, multiActivity]);
@@ -92,7 +95,8 @@ export default function Participant() {
         if (data) savedReceipt = data;
       } catch { /* The fallback still identifies the submitted version. */ }
       setReceipt(savedReceipt); setFinished(true);
-      try { window.sessionStorage.removeItem(draftKey); window.sessionStorage.setItem(receiptKey, JSON.stringify(savedReceipt)); }
+      const results = { p_submission_id: submissionId, p_request_id: requestId }; setResultsAccess(results);
+      try { window.sessionStorage.removeItem(draftKey); window.sessionStorage.setItem(receiptKey, JSON.stringify(savedReceipt)); window.sessionStorage.setItem(`${receiptKey}.results`, JSON.stringify(results)); }
       catch { setStorageWarning(true); }
     } catch (failure) { setError(failure.message || 'Could not submit. Your answers are still here; please try again.'); }
     finally { setSubmitting(false); }
@@ -135,6 +139,7 @@ export default function Participant() {
         <h1 data-slide-heading tabIndex={-1}>Thank you for participating</h1><p className="study-slides__description">Your responses were submitted successfully for version {study.version_number} of this study.</p>
         {receipt?.consent_accepted_at && <p className="study-help">Consent recorded {new Date(receipt.consent_accepted_at).toLocaleString()}.</p>}
         <p className="study-help">Submission reference: {receipt?.submission_id}</p>
+        {resultsAccess && <p><Link className="study-secondary" to={privateResultsPath(resultsAccess)}>View and save your private results link</Link></p>}
       </StudySlide> : !study ? <StudySlide context="Participant portal" slideKey="unavailable"><h1 data-slide-heading tabIndex={-1}>Study unavailable</h1><p className="study-error" role="alert">{error}</p><Link to="/">Enter another code</Link></StudySlide>
       : step === 'welcome' ? <StudySlide studyTitle={`Study version ${study.version_number}`} context="Welcome to your study" slideKey="welcome"
         footer={<><span className="study-slides__footer-note">Take your time. Your perspective matters.</span><div className="study-slides__navigation"><Link to="/">Leave study</Link><button type="button" className="study-primary study-slides__next" onClick={() => study.consent_required && !consented ? setStep('consent') : openQuestions()}>Start study <span aria-hidden="true">→</span></button></div></>}>

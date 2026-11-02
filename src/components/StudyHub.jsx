@@ -5,6 +5,7 @@ import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
 import StudyActivityForm from './StudyActivityForm';
 import RecruitmentStatus from './RecruitmentStatus';
 import PortalIcon from './PortalIcon';
+import { privateResultsPath } from '../utils/participantResults';
 import { browserStorage, parseStudyKey, persistentStudyLinks, privateStudyUrl, readStudyLinks,
   removeStudyLink, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
 import './Studies.css';
@@ -126,6 +127,7 @@ export default function StudyHub() {
         </article>)}</div>
         </div><aside className="participant-hub-aside" aria-label="Study access and information">
         <section className="study-panel participant-return-panel"><h2>Your private return link</h2><p>This link opens your saved answers and progress. Keep it private and save a copy; the study team cannot recover a lost private key. You can use the link on another device without creating an account.</p><div className="study-actions"><button type="button" className="study-secondary" onClick={copyLink}>Copy private return link</button><button type="button" className="study-text-button" onClick={() => download(privateStudyUrl(window.location.origin, accessKey), 'eduthemes-private-study-link.txt', 'text/plain')}>Download private return link</button></div><label className="study-consent-choice"><input type="checkbox" checked={remember} onChange={(event) => updateRemember(event.target.checked)} /> Remember this link on this browser after I close it.</label>{storageWarning && <p className="study-note" role="status">This browser could not remember the link. Copy or download it before leaving.</p>}</section>
+        <section className="study-panel participant-study-details"><h2>Results from your study</h2><p>Read the plain-language summary when the study team releases it for your study version.</p><Link className="study-secondary" to={privateResultsPath({ p_access_key: accessKey })}>Open study results</Link></section>
         <section className="study-panel participant-study-details"><h2>Study information</h2>{study.compensation_details && <><h3>Compensation or course credit</h3><p className="study-preserve-copy">{study.compensation_details}</p></>}<p><strong>Coordinator status:</strong> {rewardLabels[study.reward_status]}</p>{study.contact_info && <><h3>Study contact</h3><p className="study-preserve-copy">{study.contact_info}</p></>}<details><summary>Review the consent for your study version</summary><div className="study-consent-copy">{study.consent_text}</div><p className="study-help">Joined {date(study.joined_at)}</p></details></section>
       </aside></div>
     </>}
