@@ -6,6 +6,7 @@ import StudyHub from './components/StudyHub';
 import { CanvasProvider } from './components/CanvasConnection';
 import './App.css';
 import './styles/ContextTheme.css';
+import './styles/RoomyTheme.css';
 
 export default function App() {
   return (
