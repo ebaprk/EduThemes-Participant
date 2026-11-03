@@ -1,0 +1,49 @@
+/* More space between content groups inside participant cards. */
+.App .study-panel { padding:38px; }
+.App .study-panel > :is(h2,h3),
+.App .study-panel > div > :is(h2,h3) { margin-bottom:18px; }
+.App .study-panel > p { margin-bottom:26px; }
+.App .study-panel p + p { margin-top:16px; }
+.App .study-panel > :last-child { margin-bottom:0; }
+.App .study-panel .study-field { gap:12px; margin-bottom:30px; }
+.App .study-panel .study-actions { gap:18px; margin-top:28px; }
+.App .study-panel > details { margin-top:28px; }
+.App .study-panel > p + :is(button,a.study-primary,a.study-secondary) { margin-top:6px; }
+.App .portal-panel-icon { margin-bottom:28px; }
+.App .portal-join-panel .join-form,
+.App .portal-private-form { gap:20px; }
+.App .portal-join-panel .join-form { margin-top:34px; }
+.App .portal-join-panel .join-form .study-help { margin:0 0 8px; }
+.App .portal-return-card { padding:28px; gap:24px; margin-top:30px; }
+.App .portal-guide { padding:36px 28px 0; }
+.App .portal-guide h2 { margin:20px 0 18px; }
+.App .portal-guide > p { margin-bottom:28px; }
+.App .portal-guide li { gap:16px; padding-block:16px 26px; }
+.App .portal-guide h3 { margin-bottom:12px; }
+.App .portal-guide-note { margin-inline:-28px; padding:24px 28px; }
+.App .portal-access-guide { padding:36px; }
+.App .participant-activity-heading { margin-bottom:28px; }
+.App .participant-activity-card > :is(.study-primary,.study-secondary) { margin-top:24px; }
+.App .participant-progress-heading { gap:28px; margin-bottom:30px; }
+.App .participant-saved-study h3 { margin:20px 0 28px; }
+.App .study-slides__content { padding:50px 54px; }
+.App .study-slides__content > p { margin-bottom:26px; }
+.App .study-slides__answer { margin-top:32px; }
+.App .screening-choice { padding:24px; gap:16px; }
+.App .participant-results-document section { margin-block:40px; }
+.App .participant-results-document h3 { margin-bottom:18px; }
+.App .participant-results-heading { gap:30px; }
+.App .edu-skeleton-panel { padding:34px; gap:28px; }
+@media(max-width:700px) {
+  .App .study-panel { padding:28px; }
+  .App .portal-guide { padding:28px 24px 0; }
+  .App .portal-guide-note { margin-inline:-24px; padding-inline:24px; }
+  .App .portal-access-guide { padding:28px; }
+  .App .study-slides__content { padding:36px 30px; }
+  .App .screening-choice { padding:22px; }
+  .App .edu-skeleton-panel { padding:28px; gap:24px; }
+}
+@media(max-width:420px) {
+  .App .study-panel { padding:24px; }
+  .App .study-slides__content { padding:30px 24px; }
+}

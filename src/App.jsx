@@ -8,6 +8,7 @@ import { CanvasProvider } from './components/CanvasConnection';
 import './App.css';
 import './styles/ContextTheme.css';
 import './styles/RoomyTheme.css';
+import './styles/CardSpacing.css';
 
 export default function App() {
   return (
