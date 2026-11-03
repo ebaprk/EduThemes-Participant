@@ -3,10 +3,10 @@
 .study-preview-facts p,.study-preview-facts li { font-size:14px; line-height:1.6; }
 .study-preview-facts ul { padding-left:18px; }
 .screening-choices { display:grid; gap:12px; border:0; margin:30px 0; padding:0; }
-.screening-choice { display:flex; align-items:center; gap:14px; padding:18px; border:1px solid #dce4d9; border-radius:12px; cursor:pointer; }
-.screening-choice:has(input:checked) { border-color:#245d49; background:#eff6f2; }
-.screening-choice input { accent-color:#245d49; width:18px; height:18px; flex-shrink:0; }
-.screening-choice:focus-within { outline:2px solid #245d49; outline-offset:3px; }
+.screening-choice { display:flex; align-items:center; gap:14px; padding:18px; border:1px solid #e3dfd7; border-radius:12px; cursor:pointer; }
+.screening-choice:has(input:checked) { border-color:#37332f; background:#f4f3f1; }
+.screening-choice input { accent-color:#37332f; width:18px; height:18px; flex-shrink:0; }
+.screening-choice:focus-within { outline:2px solid #37332f; outline-offset:3px; }
 .screening-status-panel h2 { font-size:22px; }
 .screening-status-panel .study-section-heading { flex-wrap:wrap; gap:12px; }
 .screening-status-panel > .study-primary { margin:16px 0; }
