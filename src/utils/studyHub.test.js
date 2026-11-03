@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { webcrypto } from 'node:crypto';
-import { answersFingerprint, parseStudyKey, pendingStudyKey, privateStudyUrl, readStudyLinks,
+import { answersFingerprint, forgetStudyLink, persistentStudyLinks, parseStudyKey, pendingStudyKey, privateStudyUrl, readStudyLinks,
   recoverActivityDraft, sessionStudyLinks, storeStudyLink } from './studyHub.js';
 
 function memory() { const values = new Map(); return { getItem: (key) => values.get(key) || null, setItem: (key, value) => values.set(key, value) }; }
@@ -35,4 +35,24 @@ test('local draft recovery never silently overwrites a newer saved draft from an
   assert.deepEqual(recoverActivityDraft(storage, 'draft', questions, { q: 'Newer saved draft' }, 4), { answers: { q: 'Newer saved draft' }, backup: { q: 'Unsent changes' } });
   assert.deepEqual(recoverActivityDraft(storage, 'draft', questions, { q: 'Unsent changes' }, 4), { answers: { q: 'Unsent changes' }, backup: null });
   assert.equal(answersFingerprint({ a: 'One', b: 'Two' }), answersFingerprint({ b: 'Two', a: 'One' }));
+});
+
+test('forgetting a link clears both browser shortcuts while retaining other studies and answer drafts', () => {
+  const session=memory(), persistent=memory(), other='b'.repeat(64);
+  for (const [storage,name] of [[session,sessionStudyLinks],[persistent,persistentStudyLinks]]) {
+    storeStudyLink(storage,name,{key,title:'First study'});
+    storeStudyLink(storage,name,{key:other,title:'Other study'});
+    storage.setItem('answer-draft','Keep my answers');
+  }
+  forgetStudyLink(session,persistent,key);
+  assert.deepEqual(readStudyLinks(session,sessionStudyLinks).map(item=>item.key),[other]);
+  assert.deepEqual(readStudyLinks(persistent,persistentStudyLinks).map(item=>item.key),[other]);
+  assert.equal(session.getItem('answer-draft'),'Keep my answers');
+  assert.equal(persistent.getItem('answer-draft'),'Keep my answers');
+});
+test('forgetting reports a blocked browser store and still removes the accessible shortcut', () => {
+  const session=memory(), denied={getItem(){throw new Error('Denied');},setItem(){throw new Error('Denied');}};
+  storeStudyLink(session,sessionStudyLinks,{key,title:'Study'});
+  assert.throws(()=>forgetStudyLink(session,denied,key),/could not remove every saved copy/);
+  assert.equal(readStudyLinks(session,sessionStudyLinks).length,0);
 });

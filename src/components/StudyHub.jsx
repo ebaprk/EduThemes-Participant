@@ -6,7 +6,7 @@ import StudyActivityForm from './StudyActivityForm';
 import RecruitmentStatus from './RecruitmentStatus';
 import PortalIcon from './PortalIcon';
 import { privateResultsPath } from '../utils/participantResults';
-import { browserStorage, parseStudyKey, persistentStudyLinks, privateStudyUrl, readStudyLinks,
+import { browserStorage, forgetStudyLink, parseStudyKey, persistentStudyLinks, privateStudyUrl, readStudyLinks,
   removeStudyLink, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
 import './Studies.css';
 
@@ -37,6 +37,22 @@ export default function StudyHub() {
   const [notice, setNotice] = useState('');
   const [storageWarning, setStorageWarning] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [forgetTarget, setForgetTarget] = useState(null);
+  const [forgetError, setForgetError] = useState('');
+  const forgetDialog = useRef(null);
+  const returnLinkField = useRef(null);
+  const forgotten = useRef(false);
+  useEffect(() => {
+    if (forgetTarget) forgetDialog.current?.showModal();
+    else { forgetDialog.current?.close(); if(forgotten.current) { returnLinkField.current?.focus(); forgotten.current=false; } }
+  }, [forgetTarget]);
+  const forget = () => {
+    try {
+      forgetStudyLink(browserStorage('sessionStorage'), browserStorage('localStorage'), forgetTarget.key);
+      setLinks(savedStudies()); setNotice('Saved link forgotten in this browser. Your participation and answers are unchanged.');
+      forgotten.current=true; setForgetTarget(null);
+    } catch (failure) { setLinks(savedStudies()); setForgetError(failure.message); }
+  };
   const generation = useRef(0);
   const currentKey = useRef(accessKey);
   currentKey.current = accessKey;
@@ -111,11 +127,18 @@ export default function StudyHub() {
 
   return <main className={`study-shell participant-shell participant-hub${study && !editor ? ' participant-hub--wide' : ''}${!accessKey ? ' participant-hub--library' : ''}`}>
     <span className="study-eyebrow">My studies</span>
-    {!accessKey ? <><h1>Your next activity starts here</h1><p>Open a saved study, or paste the private return link you received when you joined.</p>
-      {error && <p className="study-error" role="alert">{error}</p>}
-      <div className="portal-return-workspace"><div className="portal-return-main"><form className="study-panel join-form portal-private-form" onSubmit={(event) => { event.preventDefault(); const key = parseStudyKey(linkInput); if (key) { open(key); setLinkInput(''); } else setError('Paste a complete private return link or a 64-character study key.'); }}><span className="portal-panel-icon"><PortalIcon name="key" /></span><h2>Continue your study</h2><p>Use the private link you received when you joined.</p><label htmlFor="private-study-link">Private return link or study key</label><input id="private-study-link" type="password" autoComplete="off" spellCheck={false} value={linkInput} onChange={(event) => setLinkInput(event.target.value)} required placeholder="Paste your private link or study key" /><button type="submit" className="study-primary">Open my study<PortalIcon name="arrow" /></button></form>
-      {links.length ? <section className="participant-saved-studies"><h2>Saved in this browser</h2>{links.map((item) => <article className="study-panel participant-saved-study" key={item.key}><span className="study-version-label">Version {item.version} · {item.reference}</span><h3>{item.title}</h3><button type="button" className="study-secondary" onClick={() => open(item.key)}>Open study</button></article>)}</section> : <section className="study-panel participant-saved-study portal-saved-empty"><span className="portal-panel-icon"><PortalIcon name="folder" /></span><h2>No saved return links yet</h2><p>After screening or joining a study, its private return link will open your status and progress here.</p><Link to="/">Join a study with a researcher’s code</Link></section>}
-      </div><aside className="portal-access-guide"><span className="portal-panel-icon"><PortalIcon name="shield" /></span><h2>Keep your way back</h2><p>Your private return link opens your study progress and saved answers.</p><ul><li>Use the same link on another device to continue.</li><li>Save a copy somewhere only you can access.</li><li>Choose whether this browser remembers it.</li></ul><p className="study-help">If you only have a researcher’s study code, join the study first to receive a private return link.</p><Link to="/">Join a study<PortalIcon name="arrow" /></Link></aside></div>
+    {!accessKey ? <><h1>Your studies</h1><p>Open a saved study or use your private return link to view your status, activities, and results.</p>
+      {error && <p className="study-error" role="alert">{error}</p>}{notice && <p className="study-note" role="status">{notice}</p>}
+      <div className="portal-return-workspace"><div className="portal-return-main">{links.length ? <section className="participant-saved-studies"><h2>Saved in this browser</h2>{links.map((item) => <article className="study-panel participant-saved-study" key={item.key}><span className="study-version-label">Version {item.version} · {item.reference}</span><h3>{item.title}</h3><div className="study-actions"><button type="button" className="study-secondary" onClick={() => open(item.key)}>Open study</button><button type="button" className="study-text-button" onClick={() => { setForgetError(''); setForgetTarget(item); }}>Forget saved link<span className="visually-hidden"> for {item.title}</span></button></div></article>)}</section> : null}
+      <form className="study-panel join-form portal-private-form" onSubmit={(event) => { event.preventDefault(); const key = parseStudyKey(linkInput); if (key) { open(key); setLinkInput(''); } else setError('Paste a complete private return link or a 64-character study key.'); }}><span className="portal-panel-icon"><PortalIcon name="key" /></span><h2>Continue your study</h2><p>Use the private link you received when you joined.</p><label htmlFor="private-study-link">Private return link or study key</label><input ref={returnLinkField} id="private-study-link" type="password" autoComplete="off" spellCheck={false} value={linkInput} onChange={(event) => setLinkInput(event.target.value)} required placeholder="Paste your private link or study key" /><button type="submit" className="study-primary">Open my study<PortalIcon name="arrow" /></button></form>
+
+      </div></div>
+      <details className="portal-help-details"><summary>About your private return link</summary><p>Your private link opens your study progress and saved answers, including on another device. Keep a copy somewhere private. A researcher’s study code starts participation; it cannot recover your saved progress.</p></details>
+      <dialog ref={forgetDialog} className="portal-confirm-dialog" aria-labelledby="forget-link-title" onCancel={() => setForgetTarget(null)}>
+        <h2 id="forget-link-title">Forget this saved link?</h2><p>This removes the shortcut for “{forgetTarget?.title}” from this browser. Your study participation and saved answers remain with the study.</p><p>Keep a copy of your private return link if you want to come back. The study team cannot recover a lost private key.</p>
+        {forgetError && <p className="study-error" role="alert">{forgetError}</p>}
+        <div className="study-actions"><button type="button" className="study-secondary" autoFocus onClick={() => setForgetTarget(null)}>Keep saved link</button><button type="button" className="study-primary" onClick={forget}>Forget saved link</button></div>
+      </dialog>
     </> : !supabaseConfigured ? <p className="study-error" role="alert">This site has not been connected to its study service.</p> : loading || resolvedKey !== accessKey ? <LoadingSkeleton variant="study" rows={2} label="Opening your private study and saved progress…" /> : !study ? <><h1>Open your private study</h1>{error && <p className="study-error" role="alert">{error}</p>}<div className="study-actions"><button type="button" className="study-primary" onClick={() => { setError(''); load(true); }}>Try again</button><button type="button" className="study-text-button" onClick={backToList}>Return to saved studies</button></div></> : <>
       <button type="button" className="study-text-button" disabled={Boolean(editor) || Boolean(starting)} onClick={backToList}>← Saved studies</button>
       <h1>{study.title}</h1><p className="study-version-label">Version {study.version_number} · Your reference: {study.participant_reference}</p>

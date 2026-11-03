@@ -63,3 +63,12 @@ export function recoverActivityDraft(storage, name, questions, serverAnswers, re
 export function answersFingerprint(answers) {
   return JSON.stringify(Object.fromEntries(Object.keys(answers).sort().map((key) => [key, answers[key]])));
 }
+
+// Remove browser shortcuts only; study participation and answer drafts are retained.
+export function forgetStudyLink(sessionStorage, localStorage, key) {
+  let failed = false;
+  for (const [storage, name] of [[sessionStorage, sessionStudyLinks], [localStorage, persistentStudyLinks]]) {
+    try { removeStudyLink(storage, name, key); } catch { failed = true; }
+  }
+  if (failed) throw new Error('This browser could not remove every saved copy. Check browser storage permissions and try again.');
+}

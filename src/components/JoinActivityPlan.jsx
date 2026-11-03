@@ -3,14 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import LoadingSkeleton, { Skeleton } from './LoadingSkeleton';
 import { StudyInformation, StudySlide } from './StudySlides';
-import { browserStorage, pendingStudyKey, persistentStudyLinks, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
+import { browserStorage, pendingStudyKey, persistentStudyLinks, readStudyLinks, removeStudyLink, sessionStudyLinks, storeStudyLink } from '../utils/studyHub';
 
 export default function JoinActivityPlan({ study, code, recruitmentKey, onJoined, onCancel }) {
   const navigate = useNavigate();
   const [step, setStep] = useState('plan');
   const [accepted, setAccepted] = useState(false);
   const [linked, setLinked] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(() => Boolean(recruitmentKey && readStudyLinks(browserStorage('localStorage'), persistentStudyLinks).some(item => item.key === recruitmentKey)));
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState('');
   const join = async (event) => {
@@ -27,6 +27,7 @@ export default function JoinActivityPlan({ study, code, recruitmentKey, onJoined
       try {
         storeStudyLink(browserStorage('sessionStorage'), sessionStudyLinks, record);
         if (remember) storeStudyLink(browserStorage('localStorage'), persistentStudyLinks, record);
+        else removeStudyLink(browserStorage('localStorage'), persistentStudyLinks, key);
       } catch { /* The private return link remains available on the next screen. */ }
       if (onJoined) await onJoined(); else navigate(`/my-studies#access=${key}`);
     } catch (failure) { setError(failure.message || 'Could not join. Your choices are still here; please try again.'); }
