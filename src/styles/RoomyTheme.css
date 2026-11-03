@@ -1,8 +1,8 @@
 /* Shared spacious surfaces for the participant journey. */
 :root {
-  --edu-paper:#f5f6f8;
-  --edu-panel-soft:#f8f9fb;
-  --edu-border:#e2e5eb;
+  --edu-paper:#f3f5ee;
+  --edu-panel-soft:#f7f8f2;
+  --edu-border:#dce4d9;
   --edu-radius:16px;
   --edu-shadow:0 1px 3px rgba(28,36,49,.035),0 8px 28px rgba(28,36,49,.045);
   --edu-shadow-soft:0 1px 2px rgba(28,36,49,.035),0 4px 12px rgba(28,36,49,.025);
@@ -14,13 +14,13 @@
 .study-shell h3 { font-size:1.02rem; margin-bottom:12px; }
 .study-panel { padding:32px; border-radius:16px; box-shadow:var(--edu-shadow); }
 .study-primary,.study-secondary { min-height:46px; padding:12px 18px; border-radius:12px; font-size:.875rem; }
-.study-primary { box-shadow:0 2px 3px #71331f16,0 4px 10px #71331f10,inset 0 1px 0 #ffffff18; }
+.study-primary { box-shadow:0 2px 3px #2b654816,0 4px 10px #2b654810,inset 0 1px 0 #ffffff18; }
 .study-secondary { box-shadow:0 1px 2px #1c24310a; }
 .study-actions { gap:14px; }
 .study-help { font-size:.8125rem; line-height:1.8; }
 .study-note,.study-error { padding:16px 20px; border-radius:13px; font-size:.875rem; line-height:1.8; margin-bottom:24px; }
 .study-consent-choice { gap:14px; margin-block:24px; font-size:.9375rem; line-height:1.85; align-items:flex-start; }
-.study-consent-copy { padding:28px; border-radius:14px; line-height:1.9; background:#f8f9fb; }
+.study-consent-copy { padding:28px; border-radius:14px; line-height:1.9; background:#f7f8f2; }
 .participant-page-heading { margin-bottom:38px; }
 .participant-page-heading > p { font-size:.9375rem; line-height:1.8; }
 .portal-landing-grid { gap:32px; }
@@ -64,7 +64,7 @@
 .study-slides__footer { padding:22px 40px max(22px,env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -4px 18px #1c243106; gap:28px; }
 .study-slides__footer-note { font-size:.8125rem; line-height:1.7; }
 .study-slides__navigation { gap:18px; }
-.study-slides__information { margin-top:34px; padding-top:22px; border-top:1px solid #edf0f3; font-size:.875rem; }
+.study-slides__information { margin-top:34px; padding-top:22px; border-top:1px solid #eaf0e5; font-size:.875rem; }
 .study-slides .study-consent-copy { padding:28px; margin-block:28px; font-size:.9375rem; }
 .study-slides__review { margin-top:32px; }
 .study-slides__review li { padding:26px 0; }
