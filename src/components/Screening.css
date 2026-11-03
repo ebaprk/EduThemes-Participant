@@ -3,7 +3,7 @@
 .study-preview-facts p,.study-preview-facts li { font-size:14px; line-height:1.6; }
 .study-preview-facts ul { padding-left:18px; }
 .screening-choices { display:grid; gap:12px; border:0; margin:30px 0; padding:0; }
-.screening-choice { display:flex; align-items:center; gap:14px; padding:18px; border:1px solid #e5e5e8; border-radius:8px; cursor:pointer; }
+.screening-choice { display:flex; align-items:center; gap:14px; padding:18px; border:1px solid #e5e5e8; border-radius:12px; cursor:pointer; }
 .screening-choice:has(input:checked) { border-color:#a54f35; background:#f8f1ed; }
 .screening-choice input { accent-color:#a54f35; width:18px; height:18px; flex-shrink:0; }
 .screening-choice:focus-within { outline:2px solid #a54f35; outline-offset:3px; }

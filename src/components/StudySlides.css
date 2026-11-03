@@ -22,7 +22,7 @@
 .study-slides__answer-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-top: 12px; color: var(--edu-muted); font-size: .75rem; line-height: 1.6; }
 .study-slides__answer-meta > :last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .study-slides__keyboard { margin-top: 22px; color: var(--edu-muted); font-size: .78rem; }
-.study-slides kbd { padding: 3px 5px; border: 1px solid var(--edu-border); border-radius: 4px; background: var(--edu-surface); font-family: var(--font-mono); font-size: .7rem; }
+.study-slides kbd { padding: 3px 5px; border: 1px solid var(--edu-border); border-radius: 8px; background: var(--edu-surface); font-family: var(--font-mono); font-size: .7rem; }
 .study-slides__footer { position: sticky; bottom: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 18px 40px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid var(--edu-border); background: var(--edu-paper); }
 .study-slides__footer-note { color: var(--edu-muted); font-size: .78rem; }
 .study-slides__footer-note .edu-loading--inline { font-size: .78rem; margin: 0; }
