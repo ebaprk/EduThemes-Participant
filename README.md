@@ -113,3 +113,7 @@ npm run build
 ```
 
 Unit checks and a production build do not replace a configured study walkthrough. For browser scenarios and coordinated database changes, use the researcher repository’s release guides. Follow [AGENTS.md](AGENTS.md): use content-shaped skeletons for waiting states, preserve entered answers during saves, and keep genuine empty/error states separate from loading.
+
+## License
+
+Original software and documentation are licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for copyright, attribution, and the scope of this grant. Third-party materials retain their own terms.
