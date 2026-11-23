@@ -11,13 +11,17 @@
     "test": "node --env-file=.env.production --test"
   },
   "dependencies": {
+    "@eduthemes/ui": "file:../EduThemes/packages/ui",
     "@supabase/supabase-js": "^2.109.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.1"
+    "react-router-dom": "^7.4.1",
+    "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
     "@vitejs/plugin-react": "^5.0.2",
+    "tailwindcss": "^4.3.5",
     "vite": "^7.1.7"
   }
 }

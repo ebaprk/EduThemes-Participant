@@ -4,7 +4,15 @@ The standalone student and participant app for joining EduThemes studies and sub
 
 ## Run locally
 
+Clone the [researcher repository](https://github.com/ebaprk/EduThemes) and this
+repository side by side, using the directory names `EduThemes` and
+`EduThemes-Participant`. This app imports the shared UI package from
+`../EduThemes/packages/ui`; keep both repositories up to date together.
+
+From the participant repository:
+
 ```bash
+npm ci --prefix ../EduThemes/packages/ui
 npm ci
 npm run dev
 ```

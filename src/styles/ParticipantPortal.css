@@ -1,0 +1,129 @@
+.App .participant-portal-page {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  width: min(calc(100% - 48px), 46rem);
+  max-width: none;
+  padding: clamp(32px, 6vw, 68px) 0 56px;
+}
+
+.App .participant-page-heading { margin: 0; }
+
+.App .participant-portal-page .participant-page-heading h1 {
+  margin: 0;
+  font-size: clamp(1.875rem, 3vw, 2.5rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.App .participant-page-heading > p {
+  max-width: 56ch;
+  margin: 10px 0 0;
+  color: var(--edu-muted);
+  font-size: .9375rem;
+}
+
+.portal-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin: -8px 0 10px;
+  font-weight: 500;
+}
+
+.App .portal-entry-form {
+  display: grid;
+  gap: 10px;
+  padding: clamp(16px, 3vw, 24px);
+  box-shadow: none;
+}
+
+.portal-entry-form label { font-size: .875rem; font-weight: 550; }
+
+.portal-entry-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.App .portal-entry-controls input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+.portal-code-input { font-family: var(--font-mono); letter-spacing: .08em; }
+.App .portal-entry-form :is(.study-help, .study-error) { margin: 0; }
+.App .portal-entry-form .study-error { padding: 10px 12px; }
+
+.portal-page-help { display: grid; }
+
+.portal-page-help > * {
+  margin: 0;
+  border-bottom: 1px solid var(--edu-border);
+}
+
+.portal-page-help > p {
+  padding: 12px 0;
+  color: var(--edu-muted);
+}
+
+.portal-page-help summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding-block: 8px;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+
+.portal-page-help summary::-webkit-details-marker { display: none; }
+.portal-page-help summary svg { flex-shrink: 0; width: 16px; color: var(--edu-muted); }
+.portal-page-help details[open] summary svg { transform: rotate(90deg); }
+
+.portal-page-help details > p {
+  max-width: 60ch;
+  margin: 0 0 14px;
+  color: var(--edu-muted);
+}
+
+.portal-page-help details > :last-child:not(summary) { margin-bottom: 16px; }
+
+.App .portal-saved-studies h2 { margin: 0 0 10px; font-size: 1.125rem; }
+.App .portal-saved-studies ul { padding: 0; box-shadow: none; }
+
+.portal-saved-studies li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.portal-saved-studies li + li { border-top: 1px solid var(--edu-border); }
+.App .portal-saved-studies li :is(h3, p) { margin: 0; }
+.App .portal-saved-studies li p { margin-top: 4px; }
+.portal-saved-study-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.portal-saved-study-actions button { min-height: 44px; }
+.App .participant-portal-page > :is(.study-note,.study-error) { margin: 0; }
+
+@media (max-width: 600px) {
+  .App .participant-portal-page {
+    width: calc(100% - 32px);
+    gap: 20px;
+    padding-bottom: 40px;
+  }
+
+  .portal-saved-studies li { align-items: start; flex-direction: column; }
+  .portal-saved-study-actions { flex-wrap: wrap; }
+}
+
+@media (max-width: 440px) {
+  .portal-entry-controls { grid-template-columns: minmax(0, 1fr); }
+}

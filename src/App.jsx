@@ -9,6 +9,9 @@ import './App.css';
 import './styles/ContextTheme.css';
 import './styles/RoomyTheme.css';
 import './styles/CardSpacing.css';
+import './styles/shadcn.css';
+import '@eduthemes/ui/components.css';
+import './styles/ParticipantPortal.css';
 
 export default function App() {
   return (
@@ -16,7 +19,7 @@ export default function App() {
       <CanvasProvider><div className="App">
         <a className="portal-skip-link" href="#participant-main">Skip to content</a>
         <Header />
-        <div className="participant-app-content" id="participant-main" tabIndex={-1}>
+        <div id="participant-main" tabIndex={-1}>
         <Routes>
           <Route path="/my-studies" element={<StudyHub />} />
           <Route path="/results" element={<ParticipantResults />} />
